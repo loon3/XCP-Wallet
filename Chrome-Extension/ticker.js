@@ -593,35 +593,11 @@ $(document).on("click", '.tokenlisting', function (event)
       
       var $assetdiv = $( this ).prev();
       
-      var isnumeric = $assetdiv.data("numeric");
-      
-      if (isnumeric != undefined) {
-          
-          var currentasset = isnumeric;
-          
-          var enhancedassetfullname = $assetdiv.html();
-          
-//          if (enhancedassetfullname.length > 24) {
-//          
-//            var enhancedassetname = enhancedassetfullname.substr(0, 24) + "...";
-//              
-//          } else {
-              
-            var enhancedassetname = enhancedassetfullname;
-              
-//          }      
-          
-          $("#xcpbalance").data("enhanced", enhancedassetname);
-          
-          //$("#sendtokenbutton").html("Send");
+      var currentasset = $assetdiv.html();
 
-      } else {
+      $("#sendtokenbutton").html("Send "+currentasset);
+          
       
-          var currentasset = $assetdiv.html();
-          
-          //$("#sendtokenbutton").html("Send "+currentasset);
-          
-      }
       
       $(".currenttoken").html(currentasset);
       
