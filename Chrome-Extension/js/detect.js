@@ -81,7 +81,24 @@ chrome.storage.local.get(function(data) {
                                 
                             } else {
                                 
-                                $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+assetnamed+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><p style='font-size: 16px; padding-top: 30px;' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></p></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+                                findSubassetGrand(assetnamed, function(subasset) {
+
+                                    if(subasset != "error" && subasset != undefined) {
+
+                                        var subasset_lb = subasset.replace(/\./g, "<br>");
+
+                                        $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+subasset_lb+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><div style='font-size: 16px; padding: 15px 0 15px 0;' class='col-xs-12' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></div></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+
+                                    } else {
+
+                                        $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+assetnamed+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><p style='font-size: 16px; padding-top: 30px;' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></p></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+
+                                    }
+
+
+                                });
+
+                                
                                 
                             }
                             

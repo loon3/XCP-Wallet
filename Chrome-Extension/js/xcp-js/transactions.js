@@ -90,8 +90,7 @@ function assetid(asset_name) {
         var pre_id_bigint = BigIntegerSM(pre_id);
         
         var asset_id = pre_id_bigint.toString(16);
-        
-        
+          
     } else {  
     
         var b26_digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 

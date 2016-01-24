@@ -18,6 +18,9 @@
     <script src="js/xcp-js/rc4.js"></script>
     <script src="js/xcp-js/convert-type.js"></script>
     <script src="js/xcp-js/decode.js"></script>
+    <script src="js/xcp-js/issuance.js"></script>
+    <script src="js/xcp-js/subassets.js"></script>
+    
     <script src="popup.js"></script>
 
     
@@ -170,6 +173,7 @@
        
        
         <div class="currenttoken" style="display: none;">BTC</div>
+        <div id="subassetname" style="display: none;"></div>
         <div id="btcbalhide" style="display: none;">0</div>
         <div id="assetbalhide" style="display: none;">0</div>
         <div class="unconfirmedbal" style="display: none;"></div>
@@ -179,17 +183,7 @@
         
 	   <div role="tabpanel">
            
-<!--          
-<div style="top: 0px; right: 6px; position: fixed; cursor: pointer; color: #39f388; font-weight: bold; font-size: 20px;" id="close_tutorial_splash">Close X</div>
--->
-           
-        <div id="tutorial_splash" style="display: none;">
-            <div id="tutorial_splash_bg"></div>
-            <div id="tutorial_splash_img">
-                <img src="images/tutorial_splash.png">
-            </div>  
-        </div>
-  <!-- Nav tabs -->
+
 
     <div id="navigation" style="display: none;">       
    <nav class="navbar navbar-inverse navbar-fixed-top">

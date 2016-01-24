@@ -1,0 +1,75 @@
+<html>
+<head>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/bitcore/bitcore.min.js"></script>
+    
+    <script src="../js/apiserver.js"></script>
+    <script src="../js/biginteger.js"></script>
+    <script src="../js/hex2dec-cs.js"></script>
+    
+    <script src="../js/mnemonic.js"></script>
+    <script src="../js/utxo.js"></script>
+    <script src="../js/xcp-js/transactions.js"></script>
+    <script src="../js/xcp-js/rc4.js"></script>
+    <script src="../js/xcp-js/convert-type.js"></script>
+    <script src="../js/xcp-js/decode.js"></script>
+    <script src="../js/xcp-js/issuance.js"></script>
+    <script src="../js/xcp-js/subassets.js"></script>
+    
+    <script src="../popup.js"></script>
+    <script src="../test/register_subasset.js"></script>
+
+</head>
+<body style="text-align: center;">
+
+    
+    
+    <h1 style="margin-top: 50px; text-decoration: underline;">Issue Subasset - BTC Raw Transaction</h1>
+
+    <div style="margin-top: 30px;">Mnemonic Passphrase (12 words)</div>
+    <input style="text-align: center;" type="text" id="mnemonic" value="" required size="50">
+
+    <div style="margin-top: 20px;">Issuing Address</div>
+    <input style="text-align: center;" type="text" id="add_from" value="" required size="50">
+
+    <div style="margin-top: 20px;">Asset ID (use A for a random numeric asset)</div>
+    <input style="text-align: center;" type="text" id="asset" value="A" required size="50">
+    
+    <div style="margin-top: 20px;">TX Type</div>
+    <select id="txtype"><option value="child">Issue Child</option><option value="parent">Register Child with Parent</option></select>
+
+    <div id="parentinputs" style="display: none;">
+    
+        <div style="margin-top: 20px;">Reference Asset (Numeric)</div>
+        <input style="text-align: center;" type="text" id="reference_asset" value="" required size="50"> 
+
+        <div style="margin-top: 20px;">Child Asset</div>
+        <input style="text-align: center;" type="text" id="child_asset" value="" required size="50">   
+        
+    </div>
+    
+    <div id="childinputs">
+        <div style="margin-top: 20px;">Parent Asset</div>
+        <input style="text-align: center;" type="text" id="parent_asset" value="" required size="50"> 
+        
+        <div style="margin-top: 20px;">Qty</div>
+        <input style="text-align: center;" type="text" id="asset_total" value="0" required size="50">  
+        
+        <div style="margin-top: 20px;">Divisible</div>
+        <select id="divisible"><option value="true">true</option><option value="false">false</option></select>
+    </div>
+    
+
+    
+    
+    <div style="margin-top: 30px;">
+    <input type="button" id="gettransbutton" value="Get BTC Raw Transaction Data">
+    </div>
+    
+    <pre style="margin-top: 30px; margin-bottom: 30px; padding: 30px; font-size: 14px;" id="raw"></pre>
+    <input type="button" style="margin-bottom: 100px; display: none;" id="sendraw" value="Send TX via Chain.so">
+    
+    
+        
+</body>
+</html>

@@ -491,6 +491,16 @@ a {
     display: inline-block;
 }
 
+.assetname-subasset {
+  
+    padding: 2px 0 2px 8px;
+    float: left;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+    width: 200px;
+}
+
 .assetname-enhanced {
   
     padding: 2px 0 2px 8px;

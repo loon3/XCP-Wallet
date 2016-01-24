@@ -594,8 +594,18 @@ $(document).on("click", '.tokenlisting', function (event)
       var $assetdiv = $( this ).prev();
       
       var currentasset = $assetdiv.html();
+      
+      var subassetname = $("#"+currentasset+"-subasset").html();
+      
+      if(subassetname != undefined) {
+         $("#subassetname").html(subassetname);
+        $("#sendtokenbutton").html("Send");
+      } else {
+         $("#subassetname").html("");
+          $("#sendtokenbutton").html("Send "+currentasset);
+      }
 
-      $("#sendtokenbutton").html("Send "+currentasset);
+      
           
       
       
@@ -605,9 +615,7 @@ $(document).on("click", '.tokenlisting', function (event)
       
       $("#currenttoken-pending").html(qtypending);
       
-      //$(".currenttoken").html("WORKS");
-      
-      
+
       
       var pubkey = $("#xcpaddress").html();
       
