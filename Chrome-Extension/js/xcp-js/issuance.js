@@ -106,107 +106,6 @@ function create_asset_unique(add_from, assetid_new, quantity, divisible, descrip
 
 
 
-function create_issuance_data(assetid, quantity, divisible, description) {
-    
-    //max 22 character description for single OP_CHECKMULTISIG output
-    //divisible asset quantity must be less than 184467440737.09551615 and non-divisible less than 18446744073709551615 to be stored as an 8-byte hexadecimal
-    
-    if (divisible == true || divisible == "true") {
-        var quantity_int = parseFloat(quantity).toFixed(8) * 100000000;
-        var divisible_hex = "01000000000000000000";
-    } else {
-        var quantity_int = parseFloat(quantity); 
-        var divisible_hex = "00000000000000000000";
-    }
-    
-    quantity_int = Math.round(quantity_int);
-    
-    
-    if (quantity_int <= 18446744073709551615) {
-    
-        if (description.length <= 22) {
-
-            var cntrprty_prefix = "434e545250525459"; 
-            var trans_id = "00000014";
-
-            var descriptionlength = description.length;
-            var descriptionlength_hex = padprefix(descriptionlength.toString(16),2);
-
-            var initiallength = parseFloat(descriptionlength) + 39;
-            var initiallength_hex = padprefix(initiallength.toString(16),2);
-
-            var assetid_prehex = decToHex(assetid);
-
-            console.log(assetid_prehex);
-            console.log(assetid_prehex.substr(2));
-
-            var assetid_hex = padprefix(assetid_prehex.substr(2),16);
-
-            var quantity_hex = padprefix(quantity_int.toString(16),16);
-
-            var description_hex_short = bin2hex(description);
-            var description_hex = padtrail(description_hex_short, 44);
-
-            var issuance_tx_data = initiallength_hex + cntrprty_prefix + trans_id + assetid_hex + quantity_hex + divisible_hex + descriptionlength_hex + description_hex;
-
-            return issuance_tx_data;
-
-        } else if (description.length == 41) {
-
-            var cntrprty_prefix = "434e545250525459"; 
-            var trans_id = "00000014";
-
-            //var descriptionlength = 41;
-            var descriptionlength = description.length;
-            var descriptionlength_hex = padprefix(descriptionlength.toString(16),2);
-
-            var initiallength = 61;
-            var initiallength_hex = padprefix(initiallength.toString(16),2);
-
-            //var secondlength = 27;
-            var secondlength = descriptionlength - 14;
-            
-            var secondlength_hex = padprefix(secondlength.toString(16),2);
-
-
-            var assetid_prehex = decToHex(assetid);
-
-            console.log(assetid_prehex);
-            console.log(assetid_prehex.substr(2));
-
-            var assetid_hex = padprefix(assetid_prehex.substr(2),16);
-
-            var quantity_hex = padprefix(quantity_int.toString(16),16);
-
-            var description_hex_short_a = bin2hex(description.substr(0,22));
-            var description_hex_a = padtrail(description_hex_short_a, 44);
-
-            var description_hex_short_b = bin2hex(description.substr(22));
-            var description_hex_b = padtrail(description_hex_short_b, 106);
-
-            var issuance_tx_data_a = initiallength_hex + cntrprty_prefix + trans_id + assetid_hex + quantity_hex + divisible_hex + descriptionlength_hex + description_hex_a;
-
-            var issuance_tx_data_b = secondlength_hex + cntrprty_prefix + description_hex_b;
-
-            console.log("msig output 1 length: "+issuance_tx_data_a.length);
-            console.log("msig output 2 length: "+issuance_tx_data_b.length);
-
-            var issuance_tx_data = [issuance_tx_data_a, issuance_tx_data_b];
-
-            return issuance_tx_data;
-
-        }
-        
-    if (description.length > 22 && description.length != 41) {
-        
-        var error = "error";
-        return error;
-        
-    }
-    
-    }
-    
-}
 
 
 function create_issuance_data_opreturn(asset, quantity, divisible, description) {
@@ -268,6 +167,218 @@ function create_issuance_data_opreturn(asset, quantity, divisible, description) 
     
 }
 
+
+
+
+function createIssuance_opreturn(add_from, assetid, quantity, divisible, description, transfee, mnemonic) {
+    
+    var privkey = getprivkey(add_from, mnemonic);
+     
+    var source_html = "https://"+INSIGHT_SERVER+"/api/addr/"+add_from+"/utxo";     
+    
+    var total_utxo = new Array();   
+       
+    $.getJSON( source_html, function( data ) {
+        
+        var amountremaining = (parseFloat(transfee)*100000000)/100000000;
+        
+        console.log(amountremaining);
+        
+        data.sort(function(a, b) {
+            return b.amount - a.amount;
+        });
+        
+        $.each(data, function(i, item) {
+            
+             var txid = data[i].txid;
+             var vout = data[i].vout;
+             var script = data[i].scriptPubKey;
+             var amount = parseFloat(data[i].amount);
+             
+             amountremaining = amountremaining - amount;            
+             amountremaining.toFixed(8);
+    
+             var obj = {
+                "txid": txid,
+                "address": add_from,
+                "vout": vout,
+                "scriptPubKey": script,
+                "amount": amount
+             };
+            
+             total_utxo.push(obj);
+              
+             //dust limit = 5460 
+            
+             if (amountremaining == 0 || amountremaining < -0.00005460) {                                 
+                 return false;
+             }
+             
+        });
+    
+        var utxo_key = total_utxo[0].txid;
+        
+        if (amountremaining < 0) {
+            var satoshi_change = -(amountremaining.toFixed(8) * 100000000).toFixed(0);
+        } else {
+            var satoshi_change = 0;
+        }
+        
+        create_asset_unique(add_from, assetid, quantity, divisible, description, function(datachunk_unencoded){
+        
+            if (datachunk_unencoded != "error") {
+                
+                var datachunk_encoded = xcp_rc4(utxo_key, datachunk_unencoded);
+
+                var bytelength = datachunk_encoded.length / 2;
+                
+                var scriptstring = "OP_RETURN "+bytelength+" 0x"+datachunk_encoded;
+                var data_script = new bitcore.Script(scriptstring);
+
+                var transaction = new bitcore.Transaction();
+
+                for (i = 0; i < total_utxo.length; i++) {
+                    transaction.from(total_utxo[i]);     
+                }
+
+                console.log(total_utxo);
+
+                var xcpdata_opreturn = new bitcore.Transaction.Output({script: data_script, satoshis: 0}); 
+
+                transaction.addOutput(xcpdata_opreturn);
+
+                console.log(satoshi_change);
+
+                if (satoshi_change > 5459) {
+                    transaction.change(add_from);
+                }
+
+                transaction.sign(privkey);
+
+                var final_trans = transaction.uncheckedSerialize();
+             
+            } else {
+
+                var final_trans = "error";
+
+            }
+
+            console.log(final_trans);
+            
+            $("#raw").html(final_trans);
+            
+            $("#sendraw").show();
+            
+            //sendBTCissue_test(final_trans);
+            
+        });
+    
+    });
+    
+}
+
+
+//function create_issuance_data(assetid, quantity, divisible, description) {
+//    
+//    //max 22 character description for single OP_CHECKMULTISIG output
+//    //divisible asset quantity must be less than 184467440737.09551615 and non-divisible less than 18446744073709551615 to be stored as an 8-byte hexadecimal
+//    
+//    if (divisible == true || divisible == "true") {
+//        var quantity_int = parseFloat(quantity).toFixed(8) * 100000000;
+//        var divisible_hex = "01000000000000000000";
+//    } else {
+//        var quantity_int = parseFloat(quantity); 
+//        var divisible_hex = "00000000000000000000";
+//    }
+//    
+//    quantity_int = Math.round(quantity_int);
+//    
+//    
+//    if (quantity_int <= 18446744073709551615) {
+//    
+//        if (description.length <= 22) {
+//
+//            var cntrprty_prefix = "434e545250525459"; 
+//            var trans_id = "00000014";
+//
+//            var descriptionlength = description.length;
+//            var descriptionlength_hex = padprefix(descriptionlength.toString(16),2);
+//
+//            var initiallength = parseFloat(descriptionlength) + 39;
+//            var initiallength_hex = padprefix(initiallength.toString(16),2);
+//
+//            var assetid_prehex = decToHex(assetid);
+//
+//            console.log(assetid_prehex);
+//            console.log(assetid_prehex.substr(2));
+//
+//            var assetid_hex = padprefix(assetid_prehex.substr(2),16);
+//
+//            var quantity_hex = padprefix(quantity_int.toString(16),16);
+//
+//            var description_hex_short = bin2hex(description);
+//            var description_hex = padtrail(description_hex_short, 44);
+//
+//            var issuance_tx_data = initiallength_hex + cntrprty_prefix + trans_id + assetid_hex + quantity_hex + divisible_hex + descriptionlength_hex + description_hex;
+//
+//            return issuance_tx_data;
+//
+//        } else if (description.length == 41) {
+//
+//            var cntrprty_prefix = "434e545250525459"; 
+//            var trans_id = "00000014";
+//
+//            //var descriptionlength = 41;
+//            var descriptionlength = description.length;
+//            var descriptionlength_hex = padprefix(descriptionlength.toString(16),2);
+//
+//            var initiallength = 61;
+//            var initiallength_hex = padprefix(initiallength.toString(16),2);
+//
+//            //var secondlength = 27;
+//            var secondlength = descriptionlength - 14;
+//            
+//            var secondlength_hex = padprefix(secondlength.toString(16),2);
+//
+//
+//            var assetid_prehex = decToHex(assetid);
+//
+//            console.log(assetid_prehex);
+//            console.log(assetid_prehex.substr(2));
+//
+//            var assetid_hex = padprefix(assetid_prehex.substr(2),16);
+//
+//            var quantity_hex = padprefix(quantity_int.toString(16),16);
+//
+//            var description_hex_short_a = bin2hex(description.substr(0,22));
+//            var description_hex_a = padtrail(description_hex_short_a, 44);
+//
+//            var description_hex_short_b = bin2hex(description.substr(22));
+//            var description_hex_b = padtrail(description_hex_short_b, 106);
+//
+//            var issuance_tx_data_a = initiallength_hex + cntrprty_prefix + trans_id + assetid_hex + quantity_hex + divisible_hex + descriptionlength_hex + description_hex_a;
+//
+//            var issuance_tx_data_b = secondlength_hex + cntrprty_prefix + description_hex_b;
+//
+//            console.log("msig output 1 length: "+issuance_tx_data_a.length);
+//            console.log("msig output 2 length: "+issuance_tx_data_b.length);
+//
+//            var issuance_tx_data = [issuance_tx_data_a, issuance_tx_data_b];
+//
+//            return issuance_tx_data;
+//
+//        }
+//        
+//    if (description.length > 22 && description.length != 41) {
+//        
+//        var error = "error";
+//        return error;
+//        
+//    }
+//    
+//    }
+//    
+//}
 
 
 //function createIssuance(add_from, assetid, quantity, divisible, description, msig_total, transfee, mnemonic, msig_outputs) {
@@ -424,110 +535,3 @@ function create_issuance_data_opreturn(asset, quantity, divisible, description) 
 //    });
 //    
 //}
-
-function createIssuance_opreturn(add_from, assetid, quantity, divisible, description, transfee, mnemonic) {
-    
-    var privkey = getprivkey(add_from, mnemonic);
-     
-    var source_html = "https://"+INSIGHT_SERVER+"/api/addr/"+add_from+"/utxo";     
-    
-    var total_utxo = new Array();   
-       
-    $.getJSON( source_html, function( data ) {
-        
-        var amountremaining = (parseFloat(transfee)*100000000)/100000000;
-        
-        console.log(amountremaining);
-        
-        data.sort(function(a, b) {
-            return b.amount - a.amount;
-        });
-        
-        $.each(data, function(i, item) {
-            
-             var txid = data[i].txid;
-             var vout = data[i].vout;
-             var script = data[i].scriptPubKey;
-             var amount = parseFloat(data[i].amount);
-             
-             amountremaining = amountremaining - amount;            
-             amountremaining.toFixed(8);
-    
-             var obj = {
-                "txid": txid,
-                "address": add_from,
-                "vout": vout,
-                "scriptPubKey": script,
-                "amount": amount
-             };
-            
-             total_utxo.push(obj);
-              
-             //dust limit = 5460 
-            
-             if (amountremaining == 0 || amountremaining < -0.00005460) {                                 
-                 return false;
-             }
-             
-        });
-    
-        var utxo_key = total_utxo[0].txid;
-        
-        if (amountremaining < 0) {
-            var satoshi_change = -(amountremaining.toFixed(8) * 100000000).toFixed(0);
-        } else {
-            var satoshi_change = 0;
-        }
-        
-        create_asset_unique(add_from, assetid, quantity, divisible, description, function(datachunk_unencoded){
-        
-            if (datachunk_unencoded != "error") {
-                
-                var datachunk_encoded = xcp_rc4(utxo_key, datachunk_unencoded);
-
-                var bytelength = datachunk_encoded.length / 2;
-                
-                var scriptstring = "OP_RETURN "+bytelength+" 0x"+datachunk_encoded;
-                var data_script = new bitcore.Script(scriptstring);
-
-                var transaction = new bitcore.Transaction();
-
-                for (i = 0; i < total_utxo.length; i++) {
-                    transaction.from(total_utxo[i]);     
-                }
-
-                console.log(total_utxo);
-
-                var xcpdata_opreturn = new bitcore.Transaction.Output({script: data_script, satoshis: 0}); 
-
-                transaction.addOutput(xcpdata_opreturn);
-
-                console.log(satoshi_change);
-
-                if (satoshi_change > 5459) {
-                    transaction.change(add_from);
-                }
-
-                transaction.sign(privkey);
-
-                var final_trans = transaction.uncheckedSerialize();
-             
-            } else {
-
-                var final_trans = "error";
-
-            }
-
-            console.log(final_trans);
-            
-            $("#raw").html(final_trans);
-            
-            $("#sendraw").show();
-            
-            //sendBTCissue_test(final_trans);
-            
-        });
-    
-    });
-    
-}

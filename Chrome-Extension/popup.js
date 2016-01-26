@@ -322,9 +322,9 @@ if (currenttoken == "XCP") {
                 
                 if(assetname.substr(0,1) == "A") {
                     
-                    var subasset_lb = $("#subassetname").html();
+                    var subassetname = $("#subassetname").html();
                     
-                    var subassetname = subasset_lb.replace(/\<br\>/g, ".");
+                    //var subassetname = subasset_lb.replace(/\<br\>/g, ".");
                     
                     
                     
@@ -332,11 +332,11 @@ if (currenttoken == "XCP") {
                     
                     if(subassetname.length > 0){
                         
-                        var splitname = subassetname.split(".");
-                        
-                        if(splitname.length > 2) {subassetname = splitname[0] + "<br>" + splitname[1] + "." + splitname[2];}
+//                        var splitname = subassetname.split(".");
+//                        
+//                        if(splitname.length > 2) {subassetname = splitname[0] + "<br>" + splitname[1] + "." + splitname[2];}
                     
-                        $("#xcpbalance").html("<div id='currentbalance'>" + assetbalance + "</div><div id='currenttoken-pending' class='unconfirmedbal'></div><div style='font-size: 14px; font-weight: bold; padding: 0 0 5px 0;'>" + subassetname + "</div><div style='font-size: 10px; font-style: italic; color: #999; display: none;'>" + currenttoken + "</div>");
+                        $("#xcpbalance").html("<div id='currentbalance'>" + assetbalance + "</div><div id='currenttoken-pending' class='unconfirmedbal'></div><div style='font-size: 14px; font-weight: bold; padding: 0 0 5px 0;'>" + subassetname + "</div><div style='font-size: 10px; font-style: italic; color: #ccc;'>" + currenttoken + "</div>");
                     
                     } else {
                     
@@ -371,13 +371,13 @@ if (currenttoken == "XCP") {
         
         if(currenttoken.substr(0,1) == "A") {         
             
-            var subasset_lb = $("#subassetname").html();
+            var subassetname = $("#subassetname").html();
 
-            var subassetname = subasset_lb.replace(/\<br\>/g, ".");
+//            var subassetname = subasset_lb.replace(/\<br\>/g, ".");
                     
             if(subassetname.length > 0){
 
-                $("#xcpbalance").html("<div id='currentbalance'>0</div><div id='currenttoken-pending' class='unconfirmedbal'></div><div style='font-size: 14px; font-weight: bold; padding: 0 0 5px 0;'>" + subassetname + "</div><div style='font-size: 10px; font-style: italic; color: #999; display: none;'>" + currenttoken + "</div>");
+                $("#xcpbalance").html("<div id='currentbalance'>0</div><div id='currenttoken-pending' class='unconfirmedbal'></div><div style='font-size: 14px; font-weight: bold; padding: 0 0 5px 0;'>" + subassetname + "</div><div style='font-size: 10px; font-style: italic; color: #ccc;'>" + currenttoken + "</div>");
 
             } else {
 
@@ -897,7 +897,8 @@ function loadAssets(add) {
 
 
 
-
+                setTimeout(function(){       
+        
                 var xcp_mempool_html = "https://counterpartychain.io/api/mempool";
 
                 $.getJSON( xcp_mempool_html, function( data ) {  
@@ -971,6 +972,8 @@ function loadAssets(add) {
                     }
 
                 });
+                    
+                }, 1000);  
 
                 //loadTransactions(add);
             
@@ -1216,17 +1219,11 @@ function loadTransactions(add, btctxs) {
 
                             if (assetname.charAt(0) == "A") {
                                 
-//                                if (typeof(hashname[assetname]) !== 'undefined') {
-//                                    
-//                                    var assetname_localbvam = hashname[assetname];
-//                                    
-//                                    var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnumerictrans'>"+assetname_localbvam+"<div style='font-size: 11px; font-style: italic; font-weight: normal;'>"+assetname+"</div></div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='addresstrans'>"+transtype+"<br><a href='"+addlink+"'>"+address.substring(0, 12)+"...</a></div></div></div><div class='small' style='width: 100%; text-align: right; margin: -18px 0 0 -14px;'><a href='"+translink+"'>"+timeConverter(time)+"</a></div></div>";
-//                                
-//                                } else {
+
                                     
                                     var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnumerictrans' style='font-size: 12px;'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='addresstrans'>"+transtype+"<br><a href='"+addlink+"'>"+address.substring(0, 12)+"...</a></div></div></div><div class='small' style='width: 100%; text-align: right; margin: -18px 0 0 -14px;'><a href='"+translink+"'>"+timeConverter(time)+"</a></div></div>";
                                 
-                              //  }
+
                                 
                                 
                             } else {
