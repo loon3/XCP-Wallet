@@ -1292,7 +1292,7 @@ function loadTransactions(add, btctxs) {
 
                             if (assetname != "BTC") {
 
-                                if (assetname.charAt(0) == "A") {
+                                if (assetname.charAt(0) == "A" || assetname.length > 12) {
 
                                         var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnumerictrans' style='font-size: 12px;'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='addresstrans'>"+transtype+"<br><a href='"+addlink+"'>"+address.substring(0, 12)+"...</a></div></div></div><div class='small' style='width: 100%; text-align: right; margin: -18px 0 0 -14px;'><a href='"+translink+"'>"+timeConverter(time)+"</a></div></div>";
 
