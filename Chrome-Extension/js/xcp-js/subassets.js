@@ -108,9 +108,13 @@ function getReferenceChildParam(issuances, reference, callback){
 
                 var rc = desc_array[1].substr(1).split("c");
                 
-                var rc_object = {r: rc[0], c: rc[1], block: block};
+                if (rc[1].length <= 12 && rc[1] === rc[1].toUpperCase()){
                 
-                rcarray.push(rc_object);
+                    var rc_object = {r: rc[0], c: rc[1], block: block};
+
+                    rcarray.push(rc_object);
+                    
+                }
                 
             } 
             
@@ -235,17 +239,3 @@ function findSubassetGrand(numeric, callback) {
 
 
 
-function storeSubasset(reference, name) {
-    
-
-}
-
-function addParent(current_desc_hex, parent) {
-
-
-}
-
-function addChild(current_desc, reference, child) {
-
-
-}

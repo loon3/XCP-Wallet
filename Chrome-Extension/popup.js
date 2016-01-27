@@ -792,6 +792,8 @@ function loadAssets(add) {
       
     //var source_html = "http://xcp.blockscan.com/api2?module=address&action=balance&btc_address="+add;
     
+    var rn_array = new Array();
+    
     var source_html = "https://counterpartychain.io/api/balances/"+add+"?description=1";
     
     var xcp_source_html = "http://counterpartychain.io/api/address/"+add;
@@ -866,22 +868,59 @@ function loadAssets(add) {
 
                         } else {
                             
-                            findSubassetGrand(assetname, function(subasset) {
-    
-                                if(subasset != "error" && subasset != undefined) {
+                            getSubassetsLocal(function(rn){
+                                
+                                var subasset_local = false;
+                                
+                                if(rn != undefined) {
+                                
+                                    for(var i = 0; i < rn.length; i++){
+
+                                        if(rn[i]["r"] == assetname) {
+
+                                            var subasset_local = rn[i]["n"];
+
+                                        } 
+
+                                    }
                                     
-                                    var subasset_lb = subasset.replace(/\./g, "<br>");
-                                    
-                                    var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-                                    
-                                } else {
-                                 
-                                    var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div class='assetname-numeric'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-   
                                 }
                                 
-                                $( "#allassets" ).append( assethtml );
+                                if(subasset_local == false) {
+                            
+                                    findSubassetGrand(assetname, function(subasset) {
+
+                                        if(subasset != "error" && subasset != undefined) {
+
+                                            rn_array = rn_array.concat({r: assetname, n: subasset});
+
+                                            var subasset_lb = subasset.replace(/\./g, "<br>");
+
+                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+
+                                        } else {
+
+                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div class='assetname-numeric'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+
+                                        }
+
+                                        $( "#allassets" ).append( assethtml );
+
+                                    });
+                                    
+                                } else {
+                                    
+                                    var subasset_lb = subasset_local.replace(/\./g, "<br>");
+
+                                    var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+                                    
+                                    $( "#allassets" ).append( assethtml );
+                                    
+                                }
+                                    
+                                    
                                 
+  
                             });
                             
                             
@@ -894,6 +933,8 @@ function loadAssets(add) {
 
 
                 });
+
+        
 
 
 
@@ -974,6 +1015,23 @@ function loadAssets(add) {
                 });
                     
                 }, 1000);  
+        
+        
+                setTimeout(function(){  
+                    
+                    
+                    if(rn_array.length > 0) {
+                        
+                        storeSubasset(rn_array, function(){
+                            
+                            var rn_array = new Array();
+                            
+                        });
+                        
+                    }
+                    
+                    
+                }, 1500)
 
                 //loadTransactions(add);
             
@@ -1117,139 +1175,154 @@ function loadTransactions(add, btctxs) {
 //    loadBvam(function(bvamdata, hashname, hashhash){
     
         loadTransactionsBTC(add, function(add, btctxs) { //{"address":"1CWpnJVCQ2hHtehW9jhVjT2Ccj9eo5dc2E","asset":"LTBCOIN","block":348621,"quantity":"-50000.00000000","status":"valid","time":1426978699,"tx_hash":"dc34bbbf3fa02619b2e086a3cde14f096b53dc91f49f43b697aaee3fdec22e86"}
+            
+            getSubassetsLocal(function(rn){
+                                      
+                var source_html = "https://counterpartychain.io/api/transactions/"+add;
 
-            var source_html = "https://counterpartychain.io/api/transactions/"+add;
+                $.getJSON( source_html, function( data ) {
 
-            $.getJSON( source_html, function( data ) {
+                    var alltxs = new Array();
 
-                var alltxs = new Array();
+                    var xcptxs = new Array();    
 
-                var xcptxs = new Array();    
-                
-                console.log(data);
-                
-                if(data.success != 0) {
+                    console.log(data);
 
-                    $.each(data.data, function(i, item) {
+                    if(data.success != 0) {
 
-                        
-                        var assetname = data.data[i].asset;
-                        var address = data.data[i].address;
-                        var quantity = data.data[i].quantity;
-                        var time = data.data[i].time;
-                        var tx = data.data[i].tx_hash;
-                        
-                     //   if (assetname == "TIMEPIECE") {
-                            xcptxs.push({assetname: assetname, address: address, tx: tx, time_utc: time, amount: quantity});
-                     //   }
+                        $.each(data.data, function(i, item) {
+
+                            var assetname = data.data[i].asset;
+                            
+                            if(rn != undefined) {
+
+                                for(var j = 0; j < rn.length; j++){
+
+                                    if(rn[j]["r"] == data.data[i].asset) {
+
+                                        assetname = rn[j]["n"].replace(/\./g, "<br>");
+
+                                    } 
+
+                                }
+
+                            }
+
+                            
+                            var address = data.data[i].address;
+                            var quantity = data.data[i].quantity;
+                            var time = data.data[i].time;
+                            var tx = data.data[i].tx_hash;
+
+                         //   if (assetname == "TIMEPIECE") {
+                                xcptxs.push({assetname: assetname, address: address, tx: tx, time_utc: time, amount: quantity});
+                         //   }
+                        });
+
+                        var alltxs = xcptxs.concat(btctxs);
+
+                    } else {
+
+                        var alltxs = btctxs;
+
+                    }
+
+                    console.log(alltxs);
+
+                    alltxs.sort(function(a, b) {
+                        return b.time_utc - a.time_utc;
                     });
 
-                    var alltxs = xcptxs.concat(btctxs);
-                    
-                } else {
-                    
-                    var alltxs = btctxs;
-                    
-                }
+                    var j;
 
-                console.log(alltxs);
+                    for (var i = 0; i < alltxs.length; i++) {
 
-                alltxs.sort(function(a, b) {
-                    return b.time_utc - a.time_utc;
-                });
+        //                j = i - 1;
 
-                var j;
+                        for (var j = 0; j < alltxs.length; j++) {
 
-                for (var i = 0; i < alltxs.length; i++) {
+                            if (i != j) {
 
-    //                j = i - 1;
+                                if (alltxs[i]["tx"] == alltxs[j]["tx"]) {
 
-                    for (var j = 0; j < alltxs.length; j++) {
-                        
-                        if (i != j) {
+                                    if(alltxs[i].assetname == "BTC") {
+                                        alltxs.splice(i, 1);
+                                    } else if(alltxs[j].assetname == "BTC") {
+                                        alltxs.splice(j, 1);
+                                    }   
 
-                            if (alltxs[i]["tx"] == alltxs[j]["tx"]) {
-
-                                if(alltxs[i].assetname == "BTC") {
-                                    alltxs.splice(i, 1);
-                                } else if(alltxs[j].assetname == "BTC") {
-                                    alltxs.splice(j, 1);
-                                }   
+                                }
 
                             }
-                            
+
                         }
 
                     }
 
-                }
-                
-//                console.log(alltxs);
+    //                console.log(alltxs);
 
-                $( "#alltransactions" ).html( "" );
+                    $( "#alltransactions" ).html( "" );
 
-                for (var i = 0; i < 100; i++) {
-                //$.each(alltxs, function(i, item) {
+                    for (var i = 0; i < 100; i++) {
+                    //$.each(alltxs, function(i, item) {
 
-                    if (alltxs[i] !== undefined) {
+                        if (alltxs[i] !== undefined) {
 
-                        var assetname = alltxs[i]["assetname"];
+                            var assetname = alltxs[i]["assetname"];
 
-                    //if (assetname.charAt(0) != "A") {
+                        //if (assetname.charAt(0) != "A") {
 
-                        var address = alltxs[i].address;
+                            var address = alltxs[i].address;
 
-                        var quantity = alltxs[i].amount;
-                        var time = alltxs[i].time_utc;
+                            var quantity = alltxs[i].amount;
+                            var time = alltxs[i].time_utc;
 
-                        //var translink = "https://counterpartychain.io/transaction/"+alltxs[i].tx;
-                        var addlink = "https://counterpartychain.io/address/"+address;
-                        var translink = "https://chain.so/tx/BTC/"+alltxs[i].tx;
-                        //var addlink = "https://chain.so/address/BTC/"+alltxs[i].tx;
+                            //var translink = "https://counterpartychain.io/transaction/"+alltxs[i].tx;
+                            var addlink = "https://counterpartychain.io/address/"+address;
+                            var translink = "https://chain.so/tx/BTC/"+alltxs[i].tx;
+                            //var addlink = "https://chain.so/address/BTC/"+alltxs[i].tx;
 
-                        if (parseFloat(quantity) < 0) {
-                            var background = "senttrans";
-                            var transtype = "<span class='small' style='color: #333;'>Sent to </span>";
-                        } else {
-                            var background = "receivedtrans";
-                            var transtype = "<span class='small' style='color: #333;'>Received from </span>";
-                        }
-
-                        if (assetname != "BTC") {
-
-                            if (assetname.charAt(0) == "A") {
-                                
-
-                                    
-                                    var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnumerictrans' style='font-size: 12px;'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='addresstrans'>"+transtype+"<br><a href='"+addlink+"'>"+address.substring(0, 12)+"...</a></div></div></div><div class='small' style='width: 100%; text-align: right; margin: -18px 0 0 -14px;'><a href='"+translink+"'>"+timeConverter(time)+"</a></div></div>";
-                                
-
-                                
-                                
+                            if (parseFloat(quantity) < 0) {
+                                var background = "senttrans";
+                                var transtype = "<span class='small' style='color: #333;'>Sent to </span>";
                             } else {
-                                var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnametrans'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='addresstrans'>"+transtype+"<br><a href='"+addlink+"'>"+address.substring(0, 12)+"...</a></div><div class='small' style='bottom: 0;'><a href='"+translink+"'>"+timeConverter(time)+"</a></div></div></div></div>";
+                                var background = "receivedtrans";
+                                var transtype = "<span class='small' style='color: #333;'>Received from </span>";
                             }
 
-                        } else {
+                            if (assetname != "BTC") {
 
-                            translink = "https://chain.so/tx/BTC/"+alltxs[i].tx;
-                            
-   
+                                if (assetname.charAt(0) == "A") {
 
-                                var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnametrans'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='small' style='margin-top: 54px;'><a href='"+translink+"''>"+timeConverter(time)+"</a></div></div></div></div>";
-                                
-                   
+                                        var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnumerictrans' style='font-size: 12px;'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='addresstrans'>"+transtype+"<br><a href='"+addlink+"'>"+address.substring(0, 12)+"...</a></div></div></div><div class='small' style='width: 100%; text-align: right; margin: -18px 0 0 -14px;'><a href='"+translink+"'>"+timeConverter(time)+"</a></div></div>";
+
+
+                                } else {
+                                    var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnametrans'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='addresstrans'>"+transtype+"<br><a href='"+addlink+"'>"+address.substring(0, 12)+"...</a></div><div class='small' style='bottom: 0;'><a href='"+translink+"'>"+timeConverter(time)+"</a></div></div></div></div>";
+                                }
+
+                            } else {
+
+                                translink = "https://chain.so/tx/BTC/"+alltxs[i].tx;
+
+
+
+                                    var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnametrans'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='small' style='margin-top: 54px;'><a href='"+translink+"''>"+timeConverter(time)+"</a></div></div></div></div>";
+
+
+                            }
+
+
+                            $( "#alltransactions" ).append( assethtml );
+
+                        //}
                         }
-
-
-                        $( "#alltransactions" ).append( assethtml );
-
-                    //}
+                    //});
                     }
-                //});
-                }
 
-    //            $( "#alltransactions" ).append("<div style='height: 20px;'></div>");
+        //            $( "#alltransactions" ).append("<div style='height: 20px;'></div>");
+
+                });
 
             });
 
@@ -2098,6 +2171,55 @@ function checkImportedLabels(m, callback) {
     
     
 }
+
+
+function storeSubasset(refnamearray, callback) {
+    
+    
+        chrome.storage.local.get(function(data) {
+        
+            if(typeof(data["subassets"]) === 'undefined') { 
+
+                var allsubassets = new Array();
+
+            } else {
+
+                var allsubassets = data["subassets"];
+
+            }
+
+            
+
+            allsubassets = allsubassets.concat(refnamearray);
+
+            chrome.storage.local.set(
+                    {
+
+                        'subassets': allsubassets
+
+                    }, function (){
+
+                       callback();
+
+                    });
+                   
+        });
+    
+
+}
+
+
+function getSubassetsLocal(callback){
+    
+ chrome.storage.local.get(function(data) {
+     
+     callback(data["subassets"]);
+     
+ })
+ 
+}
+//        
+//        if(typeof(data["bvamwt_enabled"]) !== 'undefined') { 
 
 
 //function addBvam(newbvamdata) {
