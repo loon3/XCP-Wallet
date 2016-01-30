@@ -1014,7 +1014,7 @@ function loadAssets(add) {
 
                 });
                     
-                }, 1000);  
+                }, 1500);  
         
         
                 setTimeout(function(){  
@@ -1031,7 +1031,7 @@ function loadAssets(add) {
                     }
                     
                     
-                }, 1500)
+                }, 2000)
 
                 //loadTransactions(add);
             

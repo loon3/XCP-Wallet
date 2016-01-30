@@ -105,12 +105,26 @@ function getReferenceChildParam(issuances, reference, callback){
   //          console.log(desc_array);  
             
             if(desc_array[1].substr(0,1) == "r") {
+                
+                if(desc_array[1].slice(-1) == "x") {
+                
+                    var locked = true;
+                    
+                    desc_array[1] = desc_array[1].slice(0, -1);
+                    
+                } else {
+                    
+                    var locked = false;
+                    
+                }
 
                 var rc = desc_array[1].substr(1).split("c");
                 
-                if (rc[1].length <= 12 && rc[1] === rc[1].toUpperCase()){
+                var letterNumber = /^[0-9A-Z]+$/;  
                 
-                    var rc_object = {r: rc[0], c: rc[1], block: block};
+                if (rc[1].length > 0 && rc[1].length <= 12 && rc[1].match(letterNumber)){
+                
+                    var rc_object = {r: rc[0], c: rc[1], locked: locked, block: block};
 
                     rcarray.push(rc_object);
                     
@@ -149,12 +163,14 @@ function getReferenceChildParam(issuances, reference, callback){
     })[0];
 
     if(obj != undefined) {
+        var locked = obj.locked;
         var child = obj.c;
     } else {
         var child = "error";
+        var locked = "error";
     }
     
-    callback(child);
+    callback(child, locked);
       
 }
 
@@ -186,14 +202,14 @@ function findSubasset(numeric, callback) {
             
             findIssuances(parent, function(data){
             
-                getReferenceChildParam(data, numeric, function(child){
+                getReferenceChildParam(data, numeric, function(child, locked){
                     if(child != "error"){
                         var subasset = parent+"."+child;
                     } else {
                         var subasset = "error";
                     }
                     
-                    callback(subasset);
+                    callback(subasset, locked);
                     
                 });
         
@@ -208,7 +224,9 @@ function findSubasset(numeric, callback) {
 
 function findSubassetGrand(numeric, callback) {
     
-    findSubasset(numeric, function(subasset) {
+    findSubasset(numeric, function(subasset, locked) {
+        
+        console.log(locked);
         
         if(subasset.substr(0,1) != "A"){
             
@@ -218,16 +236,17 @@ function findSubassetGrand(numeric, callback) {
             
             var array = subasset.split(".");
             
-            findSubasset(array[0], function(superasset) {
+            findSubasset(array[0], function(superasset, locked) {
                 
-                if(superasset.substr(0,1) != "A"){
+                console.log(locked);
+                
+                if(superasset.substr(0,1) != "A" && locked == false){
                     var combined = superasset + "." + array[1];   
                     callback(combined);   
                 } else {
                     callback("error");
                 }
-                
-                
+
             })
             
         }
