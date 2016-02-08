@@ -1134,6 +1134,11 @@ function loadTransactionsBTC(add, callback) {
     
     var source_html = "http://btc.blockr.io/api/v1/address/txs/"+add;
     
+    
+   // var source_html = "http://btc.blockr.io/api/v1/address/info/"+add+"?confirmations=0";
+    
+    //http://btc.blockr.io/api/v1/address/unconfirmed/18V1VijvsHEejLqKZjaDJMqk1ZwAbaRCvX
+    
     $.getJSON( source_html, function( data ) {
         
         var btctxs = new Array();
