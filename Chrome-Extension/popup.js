@@ -505,67 +505,67 @@ function getRate(assetbalance, pubkey, currenttoken){
                                 }); 
             
             
-            $.getJSON( "http://www.coincap.io/front/", function( data ) {
-                
-                var j = 0;
-                
-                var assetrates = new Array();  
-                
-                $.each(data, function(i, item) {
-                        var assetname = data[i].short;
-                        var assetprice = data[i].price;  
-
-                        if (assetname == "LTBC"){ 
-                            assetname = "LTBCOIN";
-                            
-                            assetrates[j] = {assetname, assetprice};
-                            j++;
-                        }
-                    
-                        if (assetname == "XCP"){ 
-                            
-                            assetrates[j] = {assetname, assetprice};
-                            j++;
-                        }
-
-                        
-                 });
-                
-                
-        
-              $.getJSON( "http://www.coincap.io/front/xcp", function( data ) {
-
-                     
-
-                 $.each(data, function(i, item) {
-                        var assetname = data[i].short;
-                        var assetprice = data[i].price;  
-
-                        if (assetname != "LTBC" && assetname != "XCP"){ 
-                            
-                            assetrates[i+j] = {assetname, assetprice};
-                            
-                        }
-
-                        
-                 });
-                  
-                  var currentdate = new Date(); 
-                  var datetime = (currentdate.getMonth()+1) + "/" + currentdate.getDate() + "/" + currentdate.getFullYear() + " at " + currentdate.getHours() + ":" + padprefix(currentdate.getMinutes(), 2);
-                  
-                  
-                  
-
-                  chrome.storage.local.set(
-                        {
-                            'assetrates': assetrates,
-                            'assetrates_updated': datetime
-
-                        });
-
-                });
-                
-             });
+//            $.getJSON( "https://www.coincap.io/front/", function( data ) {
+//                
+//                var j = 0;
+//                
+//                var assetrates = new Array();  
+//                
+//                $.each(data, function(i, item) {
+//                        var assetname = data[i].short;
+//                        var assetprice = data[i].price;  
+//
+//                        if (assetname == "LTBC"){ 
+//                            assetname = "LTBCOIN";
+//                            
+//                            assetrates[j] = {assetname, assetprice};
+//                            j++;
+//                        }
+//                    
+//                        if (assetname == "XCP"){ 
+//                            
+//                            assetrates[j] = {assetname, assetprice};
+//                            j++;
+//                        }
+//
+//                        
+//                 });
+//                
+//                
+//        
+//              $.getJSON( "https://www.coincap.io/front/xcp", function( data ) {
+//
+//                     
+//
+//                 $.each(data, function(i, item) {
+//                        var assetname = data[i].short;
+//                        var assetprice = data[i].price;  
+//
+//                        if (assetname != "LTBC" && assetname != "XCP"){ 
+//                            
+//                            assetrates[i+j] = {assetname, assetprice};
+//                            
+//                        }
+//
+//                        
+//                 });
+//                  
+//                  var currentdate = new Date(); 
+//                  var datetime = (currentdate.getMonth()+1) + "/" + currentdate.getDate() + "/" + currentdate.getFullYear() + " at " + currentdate.getHours() + ":" + padprefix(currentdate.getMinutes(), 2);
+//                  
+//                  
+//                  
+//
+//                  chrome.storage.local.set(
+//                        {
+//                            'assetrates': assetrates,
+//                            'assetrates_updated': datetime
+//
+//                        });
+//
+//                });
+//                
+//             });
         });
     
     } else {
@@ -1214,9 +1214,9 @@ function loadTransactions(add, btctxs) {
                             var time = data.data[i].time;
                             var tx = data.data[i].tx_hash;
 
-                         //   if (assetname == "TIMEPIECE") {
-                                xcptxs.push({assetname: assetname, address: address, tx: tx, time_utc: time, amount: quantity});
-                         //   }
+                         
+                            xcptxs.push({assetname: assetname, address: address, tx: tx, time_utc: time, amount: quantity});
+                         
                         });
 
                         var alltxs = xcptxs.concat(btctxs);
@@ -1302,12 +1302,18 @@ function loadTransactions(add, btctxs) {
                                 }
 
                             } else {
-
+                                
                                 translink = "https://chain.so/tx/BTC/"+alltxs[i].tx;
+                                
+                                if(quantity == "+0.00005468") {
 
-
-
-                                    var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnametrans'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='small' style='margin-top: 54px;'><a href='"+translink+"''>"+timeConverter(time)+"</a></div></div></div></div>";
+                                    var assethtml = "<div class='"+background+"'><div class='row'><div class='col-xs-6'><div class='assetnametrans'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='small' style='margin-top: 54px;'><a href='"+translink+"''>"+timeConverter(time)+"</a></div></div></div><div align='center' style='padding: 15px'><button class='btn btn-xs btn-info checkmessage' data-txid='"+alltxs[i].tx+"'>Check for Message</button></div></div>";
+                                    
+                                } else {
+                                    
+                                    var assethtml = "<div class='"+background+"' id='txid-"+alltxs[i].tx+"'><div class='row'><div class='col-xs-6'><div class='assetnametrans'>"+assetname+"</div><div class='assetqtytrans'><span class='small'>Amount:</span><br>"+quantity+"</div></div><div class='col-xs-6'><div class='small' style='margin-top: 54px;'><a href='"+translink+"''>"+timeConverter(time)+"</a></div></div></div></div>";
+                                    
+                                }
 
 
                             }

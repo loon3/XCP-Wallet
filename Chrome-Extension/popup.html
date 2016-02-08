@@ -21,30 +21,29 @@
     <script src="js/xcp-js/issuance.js"></script>
     <script src="js/xcp-js/subassets.js"></script>
     
+    <script src="js/hex2dec-cs.js"></script>
+    
     <script src="popup.js"></script>
 
-    
-    <!-- from Countersign-->
+    <script src="js/message.js"></script>    
+
     <script src="js/mnemonic.js"></script>
     <script src="js/bitcore/bitcore.min.js"></script>
+    <script src="js/bitcore-ecies.min.js"></script>
     <script src="js/bitcoinsig.js"></script>
     <script src="js/brainlite.js"></script>
     <script src="js/bitcoinjs-min.js"></script>
     <script src="js/qrcode.min.js"></script>
-    
 
-<!--
+
     <script src="js/webtorrent/webtorrent.min.js"></script>
-    <script src="js/webtorrent/bvam-p2p.js"></script>
--->
+<!--    <script src="js/webtorrent/bvam-p2p.js"></script>-->
     
     
     
     <script src="ticker.js"></script> 
     
-<!--    <script src="js/timevault.js"></script>-->
-    
-<!--    <link rel="stylesheet" href="glidera.css">-->
+
 
     <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
     
@@ -411,6 +410,13 @@
             </div>
                 </a>
             
+            <a id="MessagingTool" href="#messagingPage" data-toggle="tab">
+             <div class="col-xs-4 toolicon activetool" align="center"> 
+                <i class="fa fa-lock fa-3x"></i>
+                <div class="small" style="padding: 10px 5px 5px 5px;">Encrypted Messaging</div>
+            </div>
+                </a>
+            
             <a id="IssueTool" href="#issuePage" data-toggle="tab">
              <div class="col-xs-4 toolicon comingsoon" align="center"> 
                 <i class="fa fa-university fa-3x"></i>
@@ -437,6 +443,44 @@
       
     </div>
       
+      <div class="tab-pane" id="messagingPage">
+            
+           
+            <div style="margin: 10px auto 20px auto; padding: 10px;">
+                <div style="padding: 0 0 5px 0;">
+                    <div class="h3" align="center">Encrypted Messaging<br><span style="font-size: 14px; font-style: italic;">powered by ECIES</span></div>
+                </div>
+                <div align="center" style="padding: 20px 0 25px 0;" class="small">
+                    View received messages in your Transaction History
+                </div>
+                <div class="form-group">
+                  <label for="receiver-encrypt">Receiver Bitcoin Address:</label>
+                  <input type="text" class="form-control" id="receiver-encrypt" style="font-size: 12px;" value="">
+                </div>
+                <div class="form-group">
+                  <label for="sender-encrypt">Sent From:</label>
+                  <input type="text" class="form-control" style="font-size: 12px;" id="sender-encrypt" value="" disabled>
+                </div>
+                <div id="decrypted-message-window">
+                    <div class="form-group">
+                      <label for="message-encrypt">Message:</label>
+                      <textarea class="form-control" id="message-encrypt" rows="2" maxlength="63"></textarea>
+                    </div>
+                    <div class="form-group" align="center">
+                      <button id="encrypt-button" class="btn btn-lg btn-info">Encrypt</button>
+                    </div>
+                </div>
+                <div id="encrypted-message-window" class="form-group" style="display: none;">
+                  <label for="encrypted-message">Encrypted Message:</label>
+                  <pre id="encrypted-message"></pre>
+                  <div align="center"><button id="send-encrypt-message" class="btn btn-success"><span style="font-size: 18px;">Send Message</span><br><span style="font-size: 11px;">Cost = 0.00031068 BTC ($<span id="usdMessageCost"></span>)</span></button></div>
+                </div>
+                <div id="message-sent-window" class="form-group" style="display: none; width: 300px;word-wrap: break-word;">
+                </div>
+            </div>
+             
+      </div>
+      
   
       <div class="tab-pane" id="ExchangeRatePage">
             
@@ -448,20 +492,83 @@
             </div>
              
       </div>
+      
+       <div class="tab-pane" id="issuePage-test">
+
+           
+      
+             <div id="issuebox">
+                 
+                 <div class="row" style="width: 100%; margin: auto;"> 
+                    
+                    <div class="col-xs-12 nopadding">
+                        
+          <div class="btn-group btn-group-justified" role="group" aria-label="...">
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default active">Numeric</button>
+              </div>
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default">Named</button>
+              </div>
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default">Linked</button>
+              </div>
+            </div>
+                        
+                        </div>
+               </div>
+                               
+                <div class="row" style="width: 100%; margin: 20px auto 10px auto;"> 
+                    
+                    <div class="col-xs-12 nopadding">
+                        
+                        <div style="margin-left: 0px;">New Asset Name:</div>
+                        <div align="center" style="width: 100%; margin: 0 0 10px 0;"><input type="text" class="form-control" id="issue-asset" maxlength="32"></div>
+                        
+                    </div>
+                    
+                </div>
+
+                <div class="row" style="width: 100%; margin: auto;">
+                    <div class="col-xs-6 nopadding">
+                        <div style="margin-left: 0px;">Quantity:</div>
+                        <div align="center" style="width: 100%; margin: 0 0 10px 0;"><input type="text" class="form-control" id="issue-qty" value="1"></div>
+                    </div>
+                    <div class="col-xs-6 nopadding">
+                        <div style="margin-left: 0px;">Divisible:</div>
+                        
+                        <div class="dropdown">
+                          <button class="btn btn-default dropdown-toggle"  style="width: 100%" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            True
+                          </button>
+                          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                            <li><a href="#">True</a></li>
+                            <li><a href="#">False</a></li>
+                          </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="padding: 20px 20px 40px 20px;">
+
+                <div align="center"><button id="issue-button" class="btn btn-warning" disabled>Issue Asset</button></div>
+                </div>
+            </div>
+    </div>
         
     
     <div class="tab-pane" id="broadcastPage">
       
              <div id="broadcastbox">
                  
-                 <h6 align="center" style="margin: 10px auto 30px auto;">Cost per broadcast is 0.000178 BTC</h6>
+                 <div class="h6" align="center" style="margin: 10px auto 30px auto; padding-top: 10px;">Cost per broadcast is 0.0001 BTC</div>
                                
                 <div class="row" style="width: 100%; margin: auto;"> 
                     
                     <div class="col-xs-12 nopadding">
                         
                         <div style="margin-left: 0px;">Broadcast Text:</div>
-                        <div align="center" style="width: 100%; margin: 0 0 10px 0;"><input type="text" class="form-control" id="broadcastmessage" maxlength="32"></div>
+                        <div align="center" style="width: 100%; margin: 0 0 10px 0;"><input type="text" class="form-control" id="broadcastmessage" maxlength="46"></div>
                         
                     </div>
                     

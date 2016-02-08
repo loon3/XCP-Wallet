@@ -1,5 +1,5 @@
 function getInsightServer() {
-    var INSIGHT_SERVER = "localbitcoinschain.com";
+    var INSIGHT_SERVER = "insight.bitpay.com";
     
     console.log("Insight Server: "+INSIGHT_SERVER);
     

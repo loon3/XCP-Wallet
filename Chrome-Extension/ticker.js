@@ -1,5 +1,7 @@
 var bitcore = require('bitcore');
+var ECIES = require('bitcore-ecies');
 
+//var client = new WebTorrent();
 
 var INSIGHT_SERVER = getInsightServer();
 
@@ -508,7 +510,8 @@ $(document).on("click", '.tokenlisting', function (event)
   $(document).on("click", '#refreshWallet', function (event)
   {
       
-      
+        $("#encrypted-message-window").hide();
+        $("#decrypted-message-window").show();
       
       
       $("#currenttoken-pending").html("");
@@ -789,6 +792,12 @@ $(document).on('click', '#toolsTab', function () {
             $("#preSign").show();            
         });   
     
+     $('#IssueTool').click(function (){
+         var newasset = create_new_assetid();
+         
+         $("#issue-asset").val(newasset);
+       
+     });         
     
     $('#sendbroadcastbutton').click(function ()
         {
@@ -807,10 +816,11 @@ $(document).on('click', '#toolsTab', function () {
                 console.log("sent!");
 
                 var minersfee = 0.0001;
-                var msig_total = 0.000078;  //total btc to multisig output (returned to sender)
+                
                 var mnemonic = $("#newpassphrase").html();
-            
-                sendBroadcast(pubkey, broadcastmessage, broadcastvalue, broadcastfeefraction, msig_total, minersfee, mnemonic, function(){
+                
+                sendBroadcast_opreturn(pubkey, broadcastmessage, broadcastvalue, broadcastfeefraction, minersfee, mnemonic, function(){
+
                     $('#allTabs a:first').tab('show');
                 
                 });
@@ -869,42 +879,44 @@ $(document).on('click', '#toolsTab', function () {
         }
         
         
-        if (currenttoken == "BTC" || currenttoken == "XCP") {
+        if (currenttoken == "BTC") {
+// || currenttoken == "XCP"
             
             if (isNaN(sendamount) == false && $("#sendtoamount").filter(function() { return $(this).val(); }).length > 0){
             
                 
-                if (currenttoken == "BTC") {
+          //      if (currenttoken == "BTC") {
                     
                     var ltbtousd = $("#ltbPrice").data("btc").price;
                     var sendinusd = sendamount / parseFloat(ltbtousd);
             
                     $("#sendUSD").html("($"+sendinusd.toFixed(2)+")");
                     
-                } else {
-                    
-                    chrome.storage.local.get(["assetrates"], function (data)
-                        {  
-                            
-                            for(i=0; i < data["assetrates"].length; i++){
-                                
-                                var findassetrate = data["assetrates"][i];
-                                
-                                if (data["assetrates"][i]["assetname"] == "XCP") {
-                    
-                                    var ltbtousd = data["assetrates"][i]["assetprice"];
-                                    var sendinusd = sendamount * parseFloat(ltbtousd);
-            
-                                    $("#sendUSD").html("($"+sendinusd.toFixed(2)+")");
-                    
-                                    
-                                }
-                            
-                            }
-                            
-                        })
-                    
-                }
+           //     } 
+//                else {
+//                    
+//                    chrome.storage.local.get(["assetrates"], function (data)
+//                        {  
+//                            
+//                            for(i=0; i < data["assetrates"].length; i++){
+//                                
+//                                var findassetrate = data["assetrates"][i];
+//                                
+//                                if (data["assetrates"][i]["assetname"] == "XCP") {
+//                    
+//                                    var ltbtousd = data["assetrates"][i]["assetprice"];
+//                                    var sendinusd = sendamount * parseFloat(ltbtousd);
+//            
+//                                    $("#sendUSD").html("($"+sendinusd.toFixed(2)+")");
+//                    
+//                                    
+//                                }
+//                            
+//                            }
+//                            
+//                        })
+//                    
+//                }
                 
  
             } else {
@@ -1030,8 +1042,129 @@ $(document).on('click', '#toolsTab', function () {
         });
 
     
-//loadSwapbots();
+    $("#MessagingTool").click(function(){  
+                        
+        $("#receiver-encrypt").val("");
+        $("#message-encrypt").val("");
+
+         var pubkey = $("#walletaddresses").val();
+
+         $("#sender-encrypt").val(pubkey);
+       
+     });
     
-//loadFeatureRequests();
+    
+$(document).on("click", '.checkmessage', function (event) {
+
+    var txid = $(this).data("txid");
+    
+    var element = this;
+    
+    var mnemonic = $("#newpassphrase").html();
+    
+    get_message_encoded(txid, mnemonic, function(message, from) {
+        
+        var messagebody = "<div style='width: 100%; color: #000;' align='left'><div style='font-weight: bold; font-size: 10px; padding-bottom: 2px;'>Received From:</div><div style='font-size: 12px; padding-bottom: 5px;'>"+from+"</div><div style='font-weight: bold; font-size: 10px; padding-bottom: 2px;'>Message:</div><div style='padding-bottom: 5px;'>"+message+"</div></div>"
+        
+        
+        $(element).parent().html(messagebody);
+        
+    })
+    
+});
+
+
+$("#encrypt-button").click(function(){
+    
+        var btcrate = $("#ltbPrice").data("btc").price;
+        var usdrate = 1 / parseFloat(btcrate);
+        var usdValue = usdrate * 0.0003107;
+    
+        $("#usdMessageCost").html(usdValue.toFixed(2));
+        
+        var pubkey = $("#walletaddresses").val();
+        var mnemonic = $("#newpassphrase").html();
+        var sender = getprivkey(pubkey, mnemonic);
+
+        var addr = $("#receiver-encrypt").val();
+        var message = $("#message-encrypt").val();
+        
+        if (bitcore.Address.isValid(addr)){
+            
+            
+        
+            getpubkey(addr, function(receiver_hex) {
+                
+                if (receiver_hex != "error") {
+                    
+                    $("#messagingPage").data("pkg", { sender: sender, receiver: receiver_hex } );
+
+                    encryptECIES(sender, receiver_hex, message, function(encryptedmess){
+
+                        $("#encrypted-message").html(encryptedmess.substr(66));
+                        
+                        $("#encrypted-message-window").show();
+                        $("#decrypted-message-window").hide();
+                        
+                    })
+                    
+                } else {
+                    
+                    $("#receiver-encrypt").val("Public Key not found!");
+                    
+                }
+
+            })
+        
+        } else {
+            
+            $("#receiver-encrypt").val("Address Invalid!");
+            
+        }
+    
+})
+    
+    
+
+$("#send-encrypt-message").click(function(){   
+    
+    var unencrypted_message_length = $("#message-encrypt").val().length;
+    
+    var message = $("#encrypted-message").html();
+      
+    var sender = $("#messagingPage").data("pkg").sender;
+    var receiver = $("#messagingPage").data("pkg").receiver;
+    
+//    seedMessage(sender, receiver, message, function(){
+//    
+//        $("#encrypted-message-window").hide();
+//        
+//        $("#message-sent-window").show();
+//    
+//    })
+
+    var pubkey = $("#walletaddresses").val();
+    var mnemonic = $("#newpassphrase").html();
+    
+    var btc_total = 0.00005468; 
+    var msig_total = 0.000078;  //total btc to multisig output (returned to sender)
+    var transfee = 0.0001;  //bitcoin tx fee
+       
+    var add_to = address_from_pubkeyhash(receiver);
+//    console.log(add_to);
+     
+    sendMessage(pubkey, add_to, message, msig_total, btc_total, transfee, mnemonic, 2, function(){
+
+        $('#allTabs a:first').tab('show');
+                
+    });
+    
+})
+    
+
+    
+
+    
+    
        
 });
