@@ -19,6 +19,7 @@
     <script src="js/xcp-js/convert-type.js"></script>
     <script src="js/xcp-js/decode.js"></script>
     <script src="js/xcp-js/issuance.js"></script>
+    <script src="js/xcp-js/dex.js"></script>
     <script src="js/xcp-js/subassets.js"></script>
     
     <script src="js/hex2dec-cs.js"></script>
@@ -195,7 +196,7 @@
             <span class="icon-bar"></span>
           </button>
          
-            <div id="navbar-id" class="navbar-brand" style="margin: -5px; cursor: default;" href="#infoPage" data-toggle="tab"><div style="display: inline-block; padding-right: 5px;"><img src="/images/xcp-icon.png" height="32px"></div><div style="display: inline-block; font-weight: bold; font-size: 16px; color: #fff;">XCP <span style="color: #EB134E;">Wallet</span></div></div>
+            <div id="navbar-id" class="navbar-brand" style="margin: -5px; cursor: default;"><div style="display: inline-block; padding-right: 5px;"><img src="/images/xcp-icon.png" height="32px"></div><div style="display: inline-block; font-weight: bold; font-size: 16px; color: #fff;">XCP <span style="color: #EB134E;">Wallet</span></div></div>
        
         </div>        
            
@@ -205,14 +206,16 @@
 <!--  <ul class="nav nav-tabs" id="allTabs">-->
      <ul class="nav navbar-nav" id="allTabs"> 
       
-    <li class="active" id="walletTab"><a id="walletLink" href="#walletPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px; text-align: center;">SEND / RECEIVE</a></li>
-    <li id="inventoryTab"><a href="#inventoryPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px;  text-align: center;">ASSET INVENTORY</a></li>
-          <li id="transactionTab"><a href="#transactionPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px;  text-align: center;">TRANSACTION HISTORY</a></li>
+    <li class="active" id="walletTab"><a id="walletLink" href="#walletPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px; text-align: center;">WALLET</a></li>
+    <li id="inventoryTab"><a href="#inventoryPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px;  text-align: center;">ASSETS</a></li>
+          <li id="transactionTab"><a href="#transactionPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px;  text-align: center;">TRANSACTIONS</a></li>
 
     
     <li id="toolsTab"><a href="#toolsPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px;  text-align: center;">TOOLS</a></li>
-    <li id="settingsTab"><a href="#settingsPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px; text-align: center;">SETTINGS</a></li>  
-<!--               <li id="infoTab"><a href="#infoPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px;  text-align: center;">ABOUT</a></li>-->
+    <li id="settingsTab"><a href="#settingsPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px; text-align: center;">SETTINGS</a></li> 
+         
+         
+               <li id="infoTab"><a href="#infoPage" class="collapsenav" data-toggle="tab" style="font-weight: bold; font-size: 16px;  text-align: center;">ABOUT</a></li>
     <!--<li id="buysellTab" style="margin-left: 12px;">
         
         <a href="#shapeshiftPage" data-toggle="tab">
@@ -244,6 +247,10 @@
 			
             <div id="mainDisplay">
                 <span id="xcpbalance"><div style='padding: 6px;'><i class='fa fa-cog fa-spin fa-2x'></i></div></span>
+            </div>
+            
+            <div id="mainDisplay-working" style="display: none;font-size:32px;">
+                <div style='padding: 6px;'><i class='fa fa-cog fa-spin fa-2x'></i></div>
             </div>
             
 <!--
@@ -398,7 +405,7 @@
                 
              <a id="SignTool" href="#signPage" data-toggle="tab">
              <div class="col-xs-4 toolicon activetool" align="center"> 
-                <<i class="fa fa-pencil fa-3x"></i>
+                <i class="fa fa-pencil fa-3x"></i>
                 <div class="small" style="padding: 10px 5px 5px 5px;">Sign Message</div>
             </div>
                 </a>
@@ -410,10 +417,19 @@
             </div>
                 </a>
             
+
+            
             <a id="MessagingTool" href="#messagingPage" data-toggle="tab">
              <div class="col-xs-4 toolicon activetool" align="center"> 
                 <i class="fa fa-lock fa-3x"></i>
                 <div class="small" style="padding: 10px 5px 5px 5px;">Encrypted Messaging</div>
+            </div>
+                </a>
+            
+                        <a id="DEXTool" href="#dexPage" data-toggle="tab">
+             <div class="col-xs-4 toolicon activetool" align="center"> 
+                <i class="fa fa-exchange fa-3x"></i>
+                <div class="small" style="padding: 10px 5px 5px 5px;">Decentralized Exchange</div>
             </div>
                 </a>
             
@@ -424,12 +440,7 @@
             </div>
                 </a>
             
-             <a id="DEXTool" href="#dexPage" data-toggle="tab">
-             <div class="col-xs-4 toolicon comingsoon" align="center"> 
-                <i class="fa fa-exchange fa-3x"></i>
-                <div class="small" style="padding: 10px 5px 5px 5px;">Decentralized Exchange</div>
-            </div>
-                </a>
+             
             
     
              
@@ -492,6 +503,151 @@
             </div>
              
       </div>
+      
+      
+      <div class="tab-pane" id="dexPage">
+          
+      
+
+      
+      <div id="dexContent" style="padding: 10px 20px 20px 20px;">
+           <div style="padding: 0 0 15px 0;">
+                    <div class="h3" align="center">Decentralized Exchange</span></div>
+                </div>
+          
+          <div class="row" id="dexOptions" style="padding: 20px 0 50px 0;" align="center">
+          
+                <div class="col-xs-12" style="padding-bottom: 15px;">
+                    <button id="browseDexOrders" type="button" class="btn btn-info">Browse Market</button>
+                </div>
+                <div class="col-xs-12" style="padding-bottom: 15px;">
+                    <button id="buynewDex" type="button" class="btn btn-warning">Create New Order</button>
+                </div>
+              
+               <div class="col-xs-12" style="padding-bottom: 15px;">
+                    <button id="openOrdersDex" type="button" class="btn btn-primary">View Your Open Orders</button>
+                </div>
+                  
+                
+          </div>
+          
+          <div id="dexOpenOrders" class="row" style="display: none;font-size: 11px;">
+                <div class="form-group ">
+                    <label for="sourceInput">Source:</label>
+                    <div style="width: 100%;">
+                        <select id="dexOpenOrdersAddress" class="addressselectdex form-control" style="font-size: 12px;"></select>
+                    </div>
+                </div>
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Sent</th>
+                    <th>Received</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dexOpenOrdersTable" style="cursor: pointer;">
+                  
+                </tbody>
+              </table>
+              
+              <div id="dexOpenOrdersTable-loading" style='width: 100%; text-align: center;'><div><i class='fa fa-cog fa-spin fa-5x'></i></div></div>
+        
+          </div>
+          
+          <div id="dexViewMarket" class="row" style="display: none;font-size: 11px;">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Asset</th>
+                    <th>Market</th>
+                  </tr>
+                </thead>
+                <tbody id="dexMarketAssets" style="cursor: pointer;">
+                  
+                </tbody>
+              </table>
+              
+              <div id="dexMarketAssets-loading" style='width: 100%; text-align: center;'><div><i class='fa fa-cog fa-spin fa-5x'></i></div></div>
+        
+          </div>
+          
+
+          
+          
+          <div id="dexBuyOrder" style="display: none;">
+          <div style="padding: 10px 0 15px 0; text-decoration: underline;">
+                    <div class="h4" align="center">Create New Order</span></div>
+                </div>
+          <div class="row">
+              <div class="col-xs-12" align="center">   
+                    <div id="dexOrderRate" style="font-size: 12px; margin: 5px 0 10px 0;"></div>
+              </div>
+              <div class="col-xs-12">
+                    <div class="form-group ">
+                        <label for="sourceInput">Source:</label>
+                        <div style="width: 100%;">
+                            <select id="dexOrderAddress" class="addressselectdex form-control" style="font-size: 12px;"></select>
+                        </div>
+                                            </div>
+                </div>
+              
+              <div class="col-xs-12">
+                    <div class="form-group ">
+                        <label for="giveQuantityInput">Sell:</label>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input type="text" style="font-size: 12px;" name="give_quantity" value="0" class="form-control" id="giveQuantityInput" placeholder="0">
+                                                            </div>
+                            <div class="col-xs-6" id="give_asset">
+<!--                                <input type="text" name="give_asset" value="" class="form-control input-lg typeahead" id="giveAssetInput" placeholder="XCP" oninput="this.value=this.value.toUpperCase();">-->
+                                <i id="dexSellAssets-working" class="fa fa-spinner fa-spin fa-3x"></i>
+                                <select id="dexSellAssets" name="dexSellAssets" class="form-control" style="font-size: 12px; display: none; height: 35px;"></select>
+                                
+                                
+                            </div>
+                            <div class="col-xs-12" align="center" style="font-size: 12px; margin: 10px 0 -20px 0;">   
+                                <div id="sellAssetBal"></div>
+                            </div>
+                        </div>
+                            
+                    </div>
+                </div>
+               
+                <div class="col-xs-12">
+                    <div class="form-group ">
+                        <label for="getQuantityInput">Buy:</label>
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input type="text" style="font-size: 12px;" name="get_quantity" value="0" class="form-control" id="getQuantityInput" placeholder="0">
+                                                            </div>
+                            <div class="col-xs-6" id="get_asset">
+                                <input type="text"  style="font-size: 12px;" name="get_asset" value="" class="form-control typeahead" id="getAssetInput" placeholder="XCP">
+                                                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="row">
+                
+                <div class="col-xs-12">
+                    <div class="form-group ">
+                        <label for="getExpirationInput">Blocks until Order Expires</label>
+                        <input type="text" style="font-size: 12px;" name="expiration" value="100" class="form-control" id="getExpirationInput">
+                                            </div>
+                </div>
+            </div>
+          <div align="center">
+            <button id="createDexOrder" type="button" class="btn btn-success">Create Order</button>
+              <div id="dex-order-message"></div>
+          </div>
+              
+              </div>
+      </div>
+          </div>
       
        <div class="tab-pane" id="issuePage-test">
 

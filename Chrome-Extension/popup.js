@@ -505,67 +505,67 @@ function getRate(assetbalance, pubkey, currenttoken){
                                 }); 
             
             
-//            $.getJSON( "https://www.coincap.io/front/", function( data ) {
-//                
-//                var j = 0;
-//                
-//                var assetrates = new Array();  
-//                
-//                $.each(data, function(i, item) {
-//                        var assetname = data[i].short;
-//                        var assetprice = data[i].price;  
-//
-//                        if (assetname == "LTBC"){ 
-//                            assetname = "LTBCOIN";
-//                            
-//                            assetrates[j] = {assetname, assetprice};
-//                            j++;
-//                        }
-//                    
-//                        if (assetname == "XCP"){ 
-//                            
-//                            assetrates[j] = {assetname, assetprice};
-//                            j++;
-//                        }
-//
-//                        
-//                 });
-//                
-//                
-//        
-//              $.getJSON( "https://www.coincap.io/front/xcp", function( data ) {
-//
-//                     
-//
-//                 $.each(data, function(i, item) {
-//                        var assetname = data[i].short;
-//                        var assetprice = data[i].price;  
-//
-//                        if (assetname != "LTBC" && assetname != "XCP"){ 
-//                            
-//                            assetrates[i+j] = {assetname, assetprice};
-//                            
-//                        }
-//
-//                        
-//                 });
-//                  
-//                  var currentdate = new Date(); 
-//                  var datetime = (currentdate.getMonth()+1) + "/" + currentdate.getDate() + "/" + currentdate.getFullYear() + " at " + currentdate.getHours() + ":" + padprefix(currentdate.getMinutes(), 2);
-//                  
-//                  
-//                  
-//
-//                  chrome.storage.local.set(
-//                        {
-//                            'assetrates': assetrates,
-//                            'assetrates_updated': datetime
-//
-//                        });
-//
-//                });
-//                
-//             });
+            $.getJSON( "https://www.coincap.io/front/", function( data ) {
+                
+                var j = 0;
+                
+                var assetrates = new Array();  
+                
+                $.each(data, function(i, item) {
+                        var assetname = data[i].short;
+                        var assetprice = data[i].price;  
+
+                        if (assetname == "LTBC"){ 
+                            assetname = "LTBCOIN";
+                            
+                            assetrates[j] = {assetname, assetprice};
+                            j++;
+                        }
+                    
+                        if (assetname == "XCP"){ 
+                            
+                            assetrates[j] = {assetname, assetprice};
+                            j++;
+                        }
+
+                        
+                 });
+                
+                
+        
+              $.getJSON( "https://www.coincap.io/front/xcp", function( data ) {
+
+                     
+
+                 $.each(data, function(i, item) {
+                        var assetname = data[i].short;
+                        var assetprice = data[i].price;  
+
+                        if (assetname != "LTBC" && assetname != "XCP"){ 
+                            
+                            assetrates[i+j] = {assetname, assetprice};
+                            
+                        }
+
+                        
+                 });
+                  
+                  var currentdate = new Date(); 
+                  var datetime = (currentdate.getMonth()+1) + "/" + currentdate.getDate() + "/" + currentdate.getFullYear() + " at " + currentdate.getHours() + ":" + padprefix(currentdate.getMinutes(), 2);
+                  
+                  
+                  
+
+                  chrome.storage.local.set(
+                        {
+                            'assetrates': assetrates,
+                            'assetrates_updated': datetime
+
+                        });
+
+                });
+                
+             });
         });
     
     } else {
@@ -783,10 +783,73 @@ function manualPassphrase(passphrase) {
 }
 
 
+function loadAssetsDex(add) {
+    
+    $("#dexSellAssets").hide();
+    $("#dexSellAssets-working").show();
+    $("#dexSellAssets").html("");
+    $("#sellAssetBal").html("");
+    $("#dexSellAssets").removeData();
+    
+    var source_html = "https://counterpartychain.io/api/balances/"+add+"?description=1";   
+    var xcp_source_html = "http://counterpartychain.io/api/address/"+add;
+     
+    $.getJSON( xcp_source_html, function( data ) {  
+        //var assetbalance = parseFloat(data.data[0].balance) + parseFloat(data.data[0].unconfirmed_balance); 
+        
+        var xcpbalance = parseFloat(data.xcp_balance).toFixed(8);    
+        
+        if (xcpbalance == 'NaN' || typeof xcpbalance === 'undefined') {
+            xcpbalance = 0;
+        }
+    
+        $.getJSON( source_html, function( data ) {
+            
+            if (xcpbalance != 0) {
+                
+                $("#dexSellAssets").append("<option label='XCP'>XCP</option>");
+                $("#sellAssetBal").html("Balance: "+xcpbalance)
+                $("#dexSellAssets").data("XCP", { bal: xcpbalance });
+                
+            }
+            
+            $.each(data.data, function(i, item) {
+                var assetname = data.data[i].asset;
+
+                if (assetname.substr(0,1) != "A") {
+                    var assetbalance = data.data[i].amount; //.balance for blockscan
 
 
+                    $("#dexSellAssets").append("<option label='"+assetname+"'>"+assetname+"</option>");
+
+
+
+                    if($("#sellAssetBal").html().length == 0) {
+                        $("#sellAssetBal").html("Balance: "+assetbalance)
+                    } 
+
+
+                    $("#dexSellAssets").data(assetname, { bal: assetbalance });
+
+                }           
+            })
+            
+            $("#dexSellAssets").show();
+            $("#dexSellAssets-working").hide();
+        })
+        
+    })
+        
+
+}
 
 function loadAssets(add) {
+    
+    $("#dexSellAssets").hide();
+    $("#dexSellAssets-working").show();
+    $("#dexSellAssets").html("");
+    $("#sellAssetBal").html("");
+    $("#dexSellAssets").removeData();
     
     $( "#allassets" ).html("<div align='center' style='margin: 40px 0 40px 0;' class='lead'><i class='fa fa-cog fa-spin fa-5x'></i></div>");
       
@@ -848,6 +911,10 @@ function loadAssets(add) {
             
                 $( "#allassets" ).append("<div class='xcpasset row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+xcpicon+"'></div></div><div class='col-xs-10'><div class='assetname'>XCP</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #CF5151; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+xcpbalance+"</div>  <div class='XCP-pending assetqty-unconfirmed'></div></div></div></div>");
                 //CF5151
+                
+                $("#dexSellAssets").append("<option label='XCP'>XCP</option>");
+                $("#sellAssetBal").html("Bal: "+xcpbalance)
+                $("#dexSellAssets").data("XCP", { bal: xcpbalance });
             }
 
                     $.each(data.data, function(i, item) {
@@ -865,6 +932,13 @@ function loadAssets(add) {
                             //$( "#allassets" ).append( assethtml );
                             
                             $( "#allassets" ).append( assethtml );
+                            
+                            $("#dexSellAssets").append("<option label='"+assetname+"'>"+assetname+"</option>");
+                            if($("#sellAssetBal").html().length == 0) {
+                                $("#sellAssetBal").html("Bal: "+assetbalance)
+                            }
+                            
+                            $("#dexSellAssets").data(assetname, { bal: assetbalance });
 
                         } else {
                             
@@ -927,10 +1001,13 @@ function loadAssets(add) {
                         }
                         
                         
+                         
+                        
 
                     });
 
-
+                            $("#dexSellAssets").show();
+                            $("#dexSellAssets-working").hide();
 
                 });
 
@@ -1191,7 +1268,7 @@ function loadTransactions(add, btctxs) {
 
                     var xcptxs = new Array();    
 
-                    console.log(data);
+                    //console.log(data);
 
                     if(data.success != 0) {
 
@@ -1232,7 +1309,7 @@ function loadTransactions(add, btctxs) {
 
                     }
 
-                    console.log(alltxs);
+                    //console.log(alltxs);
 
                     alltxs.sort(function(a, b) {
                         return b.time_utc - a.time_utc;
@@ -1791,7 +1868,8 @@ function loadAddresslist() {
     var addressindex = $("#walletaddresses option:selected").index();
     
     
-    $(".addressselectnoadd").html("");  
+    $(".addressselectnoadd").html(""); 
+    $(".addressselectdex").html("");  
     
     var HDPrivateKey = bitcore.HDPrivateKey.fromSeed(m.toHex(), bitcore.Networks.livenet);
     
@@ -1813,6 +1891,7 @@ function loadAddresslist() {
         //$(".addressselect").append("<option label='"+pubkey+"'>"+pubkey+"</option>");
         
         $(".addressselectnoadd").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'>"+pubkey+"</option>");
+        $(".addressselectdex").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'>"+pubkey+"</option>");
     }
     
     });
@@ -1976,42 +2055,42 @@ function addCommas(nStr) {
 }
 
 
-function loadSwaplist(currenttoken) {
-    
-        var swaplist_body = "<tr><td colspan='3'><div style='margin: auto; text-align: center;'><div style='padding: 0 0 0 0; width: 100%; text-align: center;'></div><div id='"+currenttoken+"-swapbotlist' style='margin: 15px 0 10px 0;'><table class='table' style='width: 260px; margin: 15px; border: 2px solid #ccc; background-color: #000;'><thead><th style='text-align: center;'>Token</th><th style='text-align: center;'>Price per "+currenttoken+"</th></thead><tbody>";
-          
-          
-        var source_html = "http://swapbot.tokenly.com/api/v1/public/availableswaps?inToken="+currenttoken+"&sort=cost";
-
-          $.getJSON( source_html, function( data ) {
-            
-              $.each(data, function(i, item) {
-                  
-                  if(data[i].bot["state"] == "active") {
-              
-                      var receive_token = data[i].swap["out"];
-
-                      var receive_token_rate = parseFloat(data[i].swap["rate"]).toFixed(8);
-
-                      var receive_token_cost = data[i].swap["cost"];
-
-                      var bot_url = data[i].bot["botUrl"];
-
-                      swaplist_body += "<tr class='swapbotselect' data-url='"+bot_url+"'><td><div style='width: 113px;'>"+receive_token+"</div></td><td><div>"+receive_token_rate+"</div></td></tr>";
-                      
-                  }
-            
-          
-              });
-              
-               
-            
-            swaplist_body += "</tbody></table></div></div></td></tr>";
-            
-            $( ".swaplistbody").html(swaplist_body);
-
-          });
-}
+//function loadSwaplist(currenttoken) {
+//    
+//        var swaplist_body = "<tr><td colspan='3'><div style='margin: auto; text-align: center;'><div style='padding: 0 0 0 0; width: 100%; text-align: center;'></div><div id='"+currenttoken+"-swapbotlist' style='margin: 15px 0 10px 0;'><table class='table' style='width: 260px; margin: 15px; border: 2px solid #ccc; background-color: #000;'><thead><th style='text-align: center;'>Token</th><th style='text-align: center;'>Price per "+currenttoken+"</th></thead><tbody>";
+//          
+//          
+//        var source_html = "http://swapbot.tokenly.com/api/v1/public/availableswaps?inToken="+currenttoken+"&sort=cost";
+//
+//          $.getJSON( source_html, function( data ) {
+//            
+//              $.each(data, function(i, item) {
+//                  
+//                  if(data[i].bot["state"] == "active") {
+//              
+//                      var receive_token = data[i].swap["out"];
+//
+//                      var receive_token_rate = parseFloat(data[i].swap["rate"]).toFixed(8);
+//
+//                      var receive_token_cost = data[i].swap["cost"];
+//
+//                      var bot_url = data[i].bot["botUrl"];
+//
+//                      swaplist_body += "<tr class='swapbotselect' data-url='"+bot_url+"'><td><div style='width: 113px;'>"+receive_token+"</div></td><td><div>"+receive_token_rate+"</div></td></tr>";
+//                      
+//                  }
+//            
+//          
+//              });
+//              
+//               
+//            
+//            swaplist_body += "</tbody></table></div></div></td></tr>";
+//            
+//            $( ".swaplistbody").html(swaplist_body);
+//
+//          });
+//}
 
 //function validateEnhancedAssetJSON(jsondata) {
 //
@@ -2351,6 +2430,14 @@ function getSubassetsLocal(callback){
 //    
 //}
 
+
+
+//
+
+
+
+
+
 function displayUnconfirmedBTC(address) {
  
 //http://btc.blockr.io/api/v1/address/unconfirmed/1C2dWhQHj8Wx319CdJcXi55zbshFkVUFXX    
@@ -2359,4 +2446,10 @@ function displayUnconfirmedBTC(address) {
     
     
 }
+
+
+
+
+
+
 

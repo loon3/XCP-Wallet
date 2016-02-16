@@ -1,31 +1,3 @@
-function checkDivisibility(asset, callback) {
-    var xcp_source_html = "https://counterpartychain.io/api/asset/"+asset;
-    
-    var result;
-    
-    $.getJSON( xcp_source_html, function( data ) {  
-        
-        if (data.success == 1) {
-          
-            var divisibility = data.divisible;
-            
-            if(divisibility == 1) {
-                result = "true"; 
-            } else {
-                result = "false";
-            }
-            
-        } else {
-            
-            result = "error";
-            
-        }
-        
-        callback(result);
-        
-    })
-}
-
 function getParentParam(issuances, callback){
     
     issuance_array = issuances.data;

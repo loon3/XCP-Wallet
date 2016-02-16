@@ -26,7 +26,7 @@ chrome.storage.local.get(function(data) {
 
                 get_xcp_encoded_opreturn(txid, function(utxo_hash, data_chunk, sendaddress, confirmation_text){
 
-                    console.log(utxo_hash);
+                    console.log(data_chunk);
 
                     //$("#arc").html(data_chunk);
                     // check for 'CNTRPRTY'

@@ -15,6 +15,7 @@ function ajax(url, data, rawtx) {
                 
                 $("#freezeUnconfirmed").css("display", "block");
                 $("#mainDisplay").css("display", "none");
+                $("#mainDisplay-working").hide();
                 //$("#yourtxid").html("<a href='https://blockchain.info/tx/"+newTxid+"'>View Transaction</a>");
                 $("#yourtxid").html("Transaction Failed!");
                 $("#txsendstatus").html("Something is wrong, please try again later");
@@ -30,6 +31,7 @@ function ajax(url, data, rawtx) {
                 console.log(newTxid);
                 $("#freezeUnconfirmed").css("display", "block");
                 $("#mainDisplay").css("display", "none");
+                $("#mainDisplay-working").hide();
                 //$("#yourtxid").html("<a href='https://blockchain.info/tx/"+newTxid+"'>View Transaction</a>");
                 $("#yourtxid").html("<a href='https://chain.so/tx/BTC/"+newTxid+"'>View Transaction</a>");
                 $("#txsendstatus").html("Balance will update after one confirmation");
@@ -50,12 +52,52 @@ function sendBTCpush(hextx) {
 //    url = 'http://blockchain.info/pushtx';
 //    postdata = 'tx=' + hextx;
     
+    $("#mainDisplay").css("display", "none");
+    $("#mainDisplay-working").show();
+    
     url = 'https://chain.so/api/v2/send_tx/BTC';
     postdata = 'tx_hex=' + hextx;
     
     if (url != null && url != "")
     {
         ajax(url, postdata, hextx);
+    }
+}
+
+
+function ajaxCB(url, data, rawtx, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            console.log(xhr.responseText);
+            
+            var checksuccess = jQuery.parseJSON(xhr.responseText);
+            
+            callback(checksuccess.status);
+            
+            xhr.close;
+        }
+    }
+    xhr.open(data ? "POST" : "GET", url, true);
+    if (data) xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhr.send(data);
+}
+
+
+function sendBTCpushCB(hextx, callback) {
+//    url = 'http://blockchain.info/pushtx';
+//    postdata = 'tx=' + hextx;
+    
+    url = 'https://chain.so/api/v2/send_tx/BTC';
+    postdata = 'tx_hex=' + hextx;
+    
+    if (url != null && url != "")
+    {
+        ajaxCB(url, postdata, hextx, function(status){
+        
+            callback(status);
+        
+        });
     }
 }
 

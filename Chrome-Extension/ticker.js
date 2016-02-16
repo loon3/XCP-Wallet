@@ -6,6 +6,7 @@ var ECIES = require('bitcore-ecies');
 var INSIGHT_SERVER = getInsightServer();
 
 
+
 $( document ).ready(function() { 
     
 //    getImageHash("pockets-48.png", function(hash){
@@ -22,6 +23,8 @@ $( document ).ready(function() {
     
 //    setBvamwtOff();
     
+    
+    
     setInitialAddressCount();
     
     setPinBackground();
@@ -37,7 +40,9 @@ $( document ).ready(function() {
      chrome.tabs.create({url: $(this).attr('href')});
      return false;
    });
+
     
+
     
     
     $("#pinsplash").hide();
@@ -510,6 +515,19 @@ $(document).on("click", '.tokenlisting', function (event)
   $(document).on("click", '#refreshWallet', function (event)
   {
       
+        if($("#createDexOrder").html() == "Reset") {
+            $("#dex-order-message").html("");
+            $("#createDexOrder").html("Create Order");
+            $("#createDexOrder").addClass("btn-success");
+            $("#createDexOrder").removeClass("btn-info");
+            $("#giveQuantityInput").val("0");
+            $("#getQuantityInput").val("0");
+            $("#getAssetInput").val("");
+            $("#getExpirationInput").val("100");
+        }
+      
+      
+      
         $("#encrypted-message-window").hide();
         $("#decrypted-message-window").show();
       
@@ -576,11 +594,14 @@ $(document).on("click", '.tokenlisting', function (event)
 //  {
 //    chrome.tabs.create({ url: "mailto:support@letstalkbitcoin.com" });
 //  });
-
-    $('#navbar-id').click(function ()
-  {
-    $("#infoPage").click();
-  }); 
+//
+//    $('#navbar-id').click(function ()
+//  {
+//    $("#infoPage").click();
+//      
+//      
+//      
+//  }); 
     
     
   $('#refresharrow').click(function ()
@@ -1072,6 +1093,7 @@ $(document).on("click", '.checkmessage', function (event) {
     })
     
 });
+    
 
 
 $("#encrypt-button").click(function(){
@@ -1162,9 +1184,580 @@ $("#send-encrypt-message").click(function(){
 })
     
 
+$("#DEXTool").click(function(){     
+
+     var pubkey = $("#dexOrderAddress").val();   
+    loadAssetsDex(pubkey)  
+    
+    $("#createDexOrder").html("Create Order");
+    $("#createDexOrder").prop('disabled', false);
+    $("#giveQuantityInput").val("0");
+    $("#getQuantityInput").val("0");
+    $("#getAssetInput").val("");
+    $("#getExpirationInput").val("100");
+        
+    
+     $("#dexOptions").show();
+    $("#dexOpenOrders").hide();
+    $("#dexOpenOrdersTable-loading").show();
+     $("#dexBuyOrder").hide();
+    $("#dexViewMarket").hide();
+    
+});
     
 
     
+$("#dexOrderAddress").change(function(){     
+
+     var pubkey = $("#dexOrderAddress").val();   
+    loadAssetsDex(pubkey)  
     
+    //$("#giveQuantityInput").val("")
+  
+    
+});
+    
+
+$(document).on("keyup", '#getAssetInput', function (event) {
+    var inputval = $(this).val();
+    $(this).val(inputval.toUpperCase());
+})
+    
+$("#dexSellAssets").change(function(){     
+
+     // $("#dexSellAssets").data(assetname, { bal: assetbalance });
+
+    var assetname = $("#dexSellAssets").val();
+    var assetbalance = $("#dexSellAssets").data(assetname).bal;
+    $("#sellAssetBal").html("Balance: "+assetbalance)
+    
+    
+    
+});
+    
+$("#createDexOrder").click(function(){    
+    
+    if($(this).html() != "Reset") {
+
+        
+        var sell_asset = $("#dexSellAssets").val()
+        var sell_qty = $("#giveQuantityInput").val()
+        var buy_asset = $("#getAssetInput").val()
+        var buy_qty = $("#getQuantityInput").val()
+        var expiration = $("#getExpirationInput").val()
+        
+        var sell_asset_balance = $("#dexSellAssets").data(sell_asset).bal;
+        
+        if(sell_asset_balance == undefined){
+            sell_asset_balance = 0;
+        }
+
+        console.log(sell_asset_balance);
+        console.log(sell_qty);
+
+        if(parseFloat(sell_asset_balance) < parseFloat(sell_qty) || $("#giveQuantityInput").val() == "0" || $("#getQuantityInput").val() == "0") {
+            
+            if($("#giveQuantityInput").val() == "0" || $("#getprivkeyQuantityInput").val() == "0") {
+                
+                $("#dex-order-message").html("<div style='margin-top: 15px;' class='alert alert-warning'>Buy and Sell cannot be zero</div>");
+                
+            } else {
+                
+                if(sell_asset == null){sell_asset = $("#dexSellAssets").data("nullasset");}
+            
+                $("#dex-order-message").html("<div style='margin-top: 15px;' class='alert alert-warning'>You do not have enough "+sell_asset+" at this address</div>");
+                    
+            }
+
+            $("#createDexOrder").html("Reset");
+            $("#createDexOrder").removeClass("btn-success");
+            $("#createDexOrder").addClass("btn-info");
+
+        } else {
+            
+            var txsAvailable = $("#txsAvailable").html();
+            
+            if ($.isNumeric(sell_qty) == true && $.isNumeric(buy_qty) == true && $.isNumeric(expiration) == true && buy_asset.length <= 12 && sell_asset.length <= 12 && expiration > 0 && expiration <= 65535 && txsAvailable > 1) {
+            
+                $("#createDexOrder").prop('disabled', true);
+                $("#createDexOrder").html("Creating New Order... <i class='fa fa-cog fa-spin'></i>");
+            
+                var pubkey = $("#dexOrderAddress").val();
+                             
+                console.log("sent!");
+
+                var minersfee = 0.0001;
+                
+                var mnemonic = $("#newpassphrase").html();
+                
+                createOrder_opreturn(pubkey, sell_asset, sell_qty, buy_asset, buy_qty, expiration, minersfee, mnemonic, function(){
+
+                    $('#allTabs a:first').tab('show');
+                
+                });
+                
+
+                
+//                createOrder_opreturn(pubkey, sell_asset, sell_qty, buy_asset, buy_qty, expiration, minersfee, mnemonic, function(status, txid){
+//                    
+//                    if (status != "success") {
+//                
+//                        $("#sendtokenbutton").html("Refresh to continue...");
+//
+//                        $("#freezeUnconfirmed").css("display", "block");
+//                        $("#mainDisplay").css("display", "none");
+//                        //$("#yourtxid").html("<a href='https://blockchain.info/tx/"+newTxid+"'>View Transaction</a>");
+//                        $("#yourtxid").html("Transaction Failed!");
+//                        $("#txsendstatus").html("Something is wrong, please try again later");
+//                        $(".tipsendcomplete").html("<div class='h1' style='padding: 60px 0 30px 0;'>Transaction Failed!</div><div class='h4'>Something is wrong, please try again later.</div></div>");
+//
+//                    } else {
+//
+//                        $("#sendtokenbutton").html("Sent! Refresh to continue...");
+//                        //$("#sendtokenbutton").prop('disabled', true);
+//
+//
+//                        $("#freezeUnconfirmed").css("display", "block");
+//                        $("#mainDisplay").css("display", "none");
+//                        //$("#yourtxid").html("<a href='https://blockchain.info/tx/"+newTxid+"'>View Transaction</a>");
+//                        $("#yourtxid").html("<a href='https://chain.so/tx/BTC/"+txid+"'>View Transaction</a>");
+//                        $("#txsendstatus").html("Balance will update after one confirmation");
+//                        $(".tipsendcomplete").html("<div class='h1' style='padding: 60px 0 30px 0;'>Send Complete!</div><div class='h4'>Token balances update in wallet after one confirmation</div><hr><div class='h2'><a href='https://chain.so/tx/BTC/"+txid+"'>View Transaction</a></div>");
+//
+//                    }
+//
+//                    $('#allTabs a:first').tab('show');
+//                
+//                });
+                
+            }
+            
+            
+            
+        }
+        
+       
+        
+        
+        
+        
+    } else {
+        
+        $("#dex-order-message").html("");
+        $("#createDexOrder").html("Create Order");
+        $("#createDexOrder").addClass("btn-success");
+        $("#createDexOrder").removeClass("btn-info");
+        $("#giveQuantityInput").val("0");
+        $("#getQuantityInput").val("0");
+        $("#getAssetInput").val("");
+        $("#getExpirationInput").val("100");
+        
+    }
+        
+    
+});
+
+    
+$("#openOrdersDex").click(function(){    
+    
+    var pubkey = $("#dexOpenOrdersAddress").val();  
+    refreshOpenOrdersDex(pubkey);
+    
+    $("#dexOptions").hide();
+    $("#dexOpenOrders").show();
+
+})
+
+$("#dexOpenOrdersAddress").change(function(){     
+
+    var pubkey = $("#dexOpenOrdersAddress").val();   
+    refreshOpenOrdersDex(pubkey);
+    
+});
+    
+    $("#buynewDex").click(function(){
+        
+        $("#dexOptions").hide();
+        $("#dexOrderRate").html("");
+        $("#giveQuantityInput").val("0");
+        $("#getQuantityInput").val("0");
+        $("#getAssetInput").val("");
+        $("#dexBuyOrder").show();
+        $("#dexBuyOrder").data("order", "");
+        
+    });
+    
+    $("#browseDexOrders").click(function(){
+        
+        $("#dexOptions").hide();
+        $("#dexViewMarket").show();
+        $("#dexMarketAssets-loading").show();
+
+        $("#dexMarketAssets").html("");
+        
+        
+          
+        getMarketsList(true, function(markets){
+            
+            $("#dexMarketAssets-loading").hide();
+            
+            chrome.storage.local.get(function(data) {
+            
+              //  console.log(markets);
+    //            i: Object
+    //                base_asset: "GUERILLA"
+    //                base_divisibility: 1
+    //                market_cap: "50000000000.0000"
+    //                pos: 10
+    //                price: "0.01000000"
+    //                price_24h: "0.25000000"
+    //                progression: "-96.00"
+    //                quote_asset: "XCP"
+    //                quote_divisibility: true
+    //                supply: 5000000000000
+    //                trend: -1
+    //                volume: 500000000
+    //                with_image: false
+
+
+                for(var i = 0; i < markets.length; i++){
+
+
+
+    //                markets[i].base_asset
+    //                quote_asset
+    //                quote_divisibility
+    //                price
+
+                    if(markets[i].quote_divisibility == true) {
+
+                        var truevolume = markets[i].volume / 100000000;
+
+                    } else {
+
+                        var truevolume = markets[i].volume;
+
+                    }
+                    
+                    var marketprice = "";
+                    
+                    var volumeprice = "";
+                    
+                  //  console.log(data.assetrates.length);
+                    
+                    for(var j = 0; j < data.assetrates.length; j++) {
+  
+                        if(data.assetrates[j].assetname == markets[i].quote_asset) {
+                    
+                            var assetprice = parseFloat(data.assetrates[j].assetprice);
+                            var price = parseFloat(markets[i].price);
+                            
+                            var volumeusd = (truevolume*assetprice).toFixed(2);
+                            
+                            //console.log(volumeusd);
+                            
+                            var assetusd = (assetprice*price).toFixed(2);
+                            
+                            marketprice = markets[i].price+" "+markets[i].quote_asset+" ($"+assetusd+")";
+                            
+                            volumeprice = truevolume+" "+markets[i].quote_asset+" ($"+volumeusd+")";
+                            
+                        }
+                    
+                    };
+                    
+                    if(marketprice.length == 0) {
+                        
+                        marketprice = markets[i].price;
+                        
+                    }
+                    
+                    if(volumeprice.length == 0) {
+                        
+                        volumeprice = truevolume;
+                        
+                    }
+
+
+                    $("#dexMarketAssets").append("<tr class='dexMarketSingle' data-base_asset='"+markets[i].base_asset+"' data-quote_asset='"+markets[i].quote_asset+"' data-quote_divisibility='"+markets[i].quote_divisibility+"'><td><div align='center' style='color: #000; background-color: #fff; padding: 5px; border-radius: 5px;'><img src='http://counterpartychain.io/content/images/icons/"+markets[i].base_asset.toLowerCase()+".png' width='46' height='46'><div style='padding-top: 4px;'>"+markets[i].base_asset+"</div></div></td><td style='background-color: #000;'><div><div><span style='text-decoration: underline; font-size: 10px;'>Last Price:</span><br><span style='color: #fff;'>"+marketprice+"</span></div><div style='padding-top: 5px;'><span style='text-decoration: underline; font-size: 10px;'>24hr Vol:</span><br><span style='color: #fff;'>"+volumeprice+"</span></div></div></td></tr>")
+
+                }
+                                           
+              
+                
+            })
+
+        
+        })
+        
+    });
+//    getBuySell("BITCRYSTALS", "XCP", function(data){console.log(data);})
+//    
+
+    $(document).on("click", '.dexMarketSingle', function (event)
+    {
+         
+        var base_asset = $(this).data("base_asset");
+        var quote_asset = $(this).data("quote_asset");
+        var quote_divisibility = $(this).data("quote_divisibility");
+             
+        var currenttoken = $(this).data("token"); 
+      
+        if ($( "div:contains('"+base_asset+" Order Book')" ).length) {
+
+              $( ".orderbookbody" ).remove(); 
+
+        } else {
+      
+            if ($('.orderbookbody').length) {
+
+                $( ".orderbookbody" ).remove(); 
+
+            } 
+
+            var row = $(this).closest('tr');
+
+            $("<tr class='orderbookbody'><td colspan='3'><div class='lead' style='text-align: center; width: 100%; color: #fff; margin: 17px 0 0 0; padding: 3px 3px 20px 3px; font-size: 16px;'>"+base_asset+" Order Book</div><div class='MarketSingleOrders' style='width: 100%; margin: auto; text-align: center;'><div style='padding: 20px 20px 50px 20px; color: #fff;'><i class='fa fa-cog fa-spin fa-5x'></i></div></div></td></tr>").insertAfter(row);
+
+
+            getBuySell(base_asset, quote_asset, function(orders){
+             //   console.log(orders);
+                
+ 
+                var orderbook_body = "<tr><td colspan='3'>";
+                
+                var orderbook_body_sell = "<table class='table table-hover' style='background-color: #000;'><thead><tr><th>Price</th><th>"+base_asset+"</th><th>"+quote_asset+"</th></tr></thead><tbody class='dex-single-order' style='cursor: pointer;'>";
+                   
+                var orderbook_body_buy = "<table class='table table-hover' style='background-color: #000;'><thead><tr><th>Price</th><th>"+base_asset+"</th><th>"+quote_asset+"</th></tr></thead><tbody class='dex-single-order' style='cursor: pointer;'>";
+          
+//0: Object
+    //amount: 289625145978
+    //price: "0.05550001"     XCP / base_asset
+    //total: 16074198000      XCP
+    //type: "SELL"
+    
+    
+                checkDivisibility(base_asset, function(divisible){
+                    
+                        orderbook_body_buy_array = new Array();
+          
+                      $.each(orders, function(i, item) {
+                          
+                          if(divisible == "true") {
+                              var order_amount = orders[i].amount / 100000000;
+                          } else {
+                              var order_amount = orders[i].amount;
+                          }
+                          
+                          if(quote_divisibility == true) {
+                              var order_total = orders[i].total / 100000000;
+                          } else { 
+                              var order_total = orders[i].total;
+                          }
+                          
+                          var order_price = parseFloat(orders[i].price);
+                          
+
+                          if(orders[i].type == "SELL") {
+
+                              orderbook_body_sell += "<tr class='single-order-dex' style='text-align: left;' data-order_price='"+order_price+"' data-order_amount='"+order_amount+"' data-order_total='"+order_total+"' data-base_asset='"+base_asset+"' data-quote_asset='"+quote_asset+"' data-order_type='sell'><td>"+order_price+"</td><td>"+order_amount+"</td><td>"+order_total+"</td></tr>";
+
+                          } else if(orders[i].type == "BUY") {
+                              
+                              orderbook_body_buy_array = orderbook_body_buy_array.concat({order_price: order_price, order_amount: order_amount, order_total: order_total}); 
+
+                          }
+
+
+                      });
+                    
+                    
+                        var reverse_buy_array = orderbook_body_buy_array.reverse();
+                    
+                        $.each(reverse_buy_array, function(i, item) {
+                            
+                            orderbook_body_buy += "<tr class='single-order-dex' style='text-align: left;' data-order_price='"+reverse_buy_array[i].order_price+"' data-order_amount='"+reverse_buy_array[i].order_amount+"' data-order_total='"+reverse_buy_array[i].order_total+"' data-base_asset='"+base_asset+"' data-quote_asset='"+quote_asset+"' data-order_type='buy'><td>"+reverse_buy_array[i].order_price+"</td><td>"+reverse_buy_array[i].order_amount+"</td><td>"+reverse_buy_array[i].order_total+"</td></tr>";
+                            
+                        });
+                    
+                    
+                    
+                    orderbook_body_buy += "</tbody></table>";
+                    orderbook_body_sell += "</tbody></table>";
+
+                    orderbook_body += "<div class='row'><div class='col-xs-12'><div>Sell Orders</div><div>"+orderbook_body_sell+"</div></div><div class='col-xs-12'><div>Buy Orders</div><div>"+orderbook_body_buy+"</div></div></td></tr>";
+
+                    $( ".MarketSingleOrders").html(orderbook_body);
+
+
+                });
+
+                
+                
+                
+            })
+      
+        }
+      
+  });
+    
+$(document).on("click", '.cancel-order-dex', function (event)
+    {    
+                
+                $(this).html("<i class='fa fa-cog fa-spin'></i>");
+                $(this).prop('disabled', true);
+        
+                var txid = $(this).data("txid");
+                
+                var pubkey = $("#dexOpenOrdersAddress").val();
+
+                var minersfee = 0.0001;
+                
+                var mnemonic = $("#newpassphrase").html();
+                
+                cancelOrder_opreturn(pubkey, txid, minersfee, mnemonic, function(){
+
+                    $('#allTabs a:first').tab('show');
+                
+                });
+        
+    });
+    
+    
+    $(document).on("click", '.single-order-dex', function (event)
+    {
+    
+        var order_price = $(this).data("order_price");
+        var order_amount = $(this).data("order_amount");
+        var order_total = $(this).data("order_total");
+        var order_type = $(this).data("order_type");
+        var base_asset = $(this).data("base_asset");
+        var quote_asset = $(this).data("quote_asset");
+        
+        $("#dexBuyOrder").data("order", { order_price: order_price, order_amount: order_amount, order_total: order_total, order_type: order_type, base_asset: base_asset, quote_asset: quote_asset })
+        
+        $("#dexOrderRate").html("Rate: "+order_price+" "+quote_asset+"/"+base_asset);
+        
+        console.log(order_price);
+        console.log(order_amount);
+        console.log(order_total);
+        console.log(order_type);
+        console.log(base_asset);
+        console.log(quote_asset);
+        
+        if(order_type == "sell") {
+            
+            
+            
+            $("#giveQuantityInput").val(order_total)
+            $("#getQuantityInput").val(order_amount)
+            $("#getAssetInput").val(base_asset)
+            $("#dexSellAssets").val(quote_asset)
+
+            if($("#dexSellAssets").data(quote_asset) == undefined) {
+                $("#sellAssetBal").html("Balance: 0");
+                $("#dexSellAssets").data(quote_asset, { bal: 0 });
+                
+                $("#dexSellAssets").append("<option label='"+quote_asset+"'>"+quote_asset+"</option>");
+                $("#dexSellAssets").val(quote_asset)
+            } else {
+                var assetbalance = $("#dexSellAssets").data(quote_asset).bal;
+                $("#sellAssetBal").html("Balance: "+assetbalance)
+            }
+
+        } else {
+            
+
+            
+            $("#giveQuantityInput").val(order_amount)
+            $("#getQuantityInput").val(order_total)
+            $("#getAssetInput").val(quote_asset)
+            $("#dexSellAssets").val(base_asset)
+            
+            if($("#dexSellAssets").val() == undefined) {
+                $("#sellAssetBal").html("Balance: 0");
+                $("#dexSellAssets").data(base_asset, { bal: 0 });
+                
+                $("#dexSellAssets").append("<option label='"+base_asset+"'>"+base_asset+"</option>");
+                $("#dexSellAssets").val(base_asset) 
+            } else {
+                var assetbalance = $("#dexSellAssets").data(base_asset).bal;
+                $("#sellAssetBal").html("Balance: "+assetbalance)
+            }
+            
+        }
+
+        $("#dexViewMarket").hide();
+        $("#dexBuyOrder").show();
+
+    
+    });  
+    
+        $(document).on("keyup", '#giveQuantityInput', function (event)
+    { 
+        
+        var order = $("#dexBuyOrder").data("order");
+        
+        //console.log(order);
+        
+        var sell_asset = $("#dexSellAssets").val();
+        var buy_asset = $("#getAssetInput").val();
+        
+        
+        if(order != undefined) {
+            
+            //0: Object
+                //amount: 289625145978
+                //price: "0.05550001"     XCP / base_asset
+                //total: 16074198000      XCP
+                //type: "SELL"
+            
+            //$("#dexBuyOrder").data("order", { order_price: order_price, order_amount: order_amount, order_total: order_total, order_type: order_type, base_asset: base_asset, quote_asset: quote_asset }
+
+            var entered = $(this).val();
+            
+            if(sell_asset == order.quote_asset && buy_asset == order.base_asset){
+                
+                var price = ((entered / order.order_price)).toFixed(8); 
+                
+            } else if(sell_asset == order.base_asset && buy_asset == order.quote_asset) {
+                
+                var price = ((entered * order.order_price)).toFixed(8); 
+                
+            }
+            
+            
+            if (sell_asset == order.quote_asset && buy_asset == order.base_asset && order.order_type == "sell" || sell_asset == order.base_asset && buy_asset == order.quote_asset && order.order_type == "buy") {
+            
+                if(order.order_type == "buy" && entered < order.order_amount || order.order_type == "sell" && entered < order.order_total) 
+                {
+                    $("#dexOrderRate").html("");
+                    $("#getQuantityInput").val(price);
+                    $("#dexOrderRate").html("Rate: "+order.order_price+" "+order.quote_asset+"/"+order.base_asset);
+                } else {
+                    $("#dexOrderRate").html("Exceeds Order Amount");
+                } 
+
+            } else {
+                $("#dexOrderRate").html("");
+            }
+
+        }
+        
+    });
+    
+   
+   $(document).on("click", '.orderDetailsBlockscan', function (event) {
+        
+     var txid = $(this).data("txid")
+        
+     var url = "http://blockscan.com/tx?txhash="+txid;    
+        
+     chrome.tabs.create({url: url});
+     
+   });
+    
+            
+      
        
 });

@@ -13,3 +13,5 @@ Download, unzip, and goto chrome://extensions/ in your Chrome browser. Make sure
 v1.0.0 - Initial release
 
 v1.1.0 - Encrypted Messaging with ECIES
+
+v1.2.0 - DEX

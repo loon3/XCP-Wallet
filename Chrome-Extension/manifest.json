@@ -37,6 +37,7 @@
         "js/xcp-js/convert-type.js",
         "js/xcp-js/decode.js",
         "js/xcp-js/issuance.js",
+        "js/xcp-js/dex.js",
         "js/xcp-js/subassets.js",
         "popup.js",
         "js/mnemonic.js",
@@ -56,5 +57,5 @@
    "name": "XCP Wallet",
    "permissions": [ "storage", "clipboardWrite", "downloads", "activeTab" ],
    "short_name": "XCP Wallet",
-   "version": "1.1.0"
+   "version": "1.2.0"
 }

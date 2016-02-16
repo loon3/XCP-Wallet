@@ -47,33 +47,33 @@ function rawtotxid(raw) {
 }
 
 
-//function assetid(asset_name) {
-//    
-//    //asset_name.toUpperCase();
-//
-//    if (asset_name != "XCP"){
-//    
-//        var b26_digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; 
-//        var name_array = asset_name.split("");
-//    
-//        var n = 0;
-//    
-//        for (i = 0; i < name_array.length; i++) { 
-//            n *= 26;
-//            n += b26_digits.indexOf(name_array[i]);
-//        }    
-//     
-//        var asset_id = n;
-//    
-//    } else {
-//        
-//        var asset_id = 1;
-//        
-//    }
-//    
-//    return asset_id;
-//    
-//}
+function checkDivisibility(asset, callback) {
+    var xcp_source_html = "https://counterpartychain.io/api/asset/"+asset;
+    
+    var result;
+    
+    $.getJSON( xcp_source_html, function( data ) {  
+        
+        if (data.success == 1) {
+          
+            var divisibility = data.divisible;
+            
+            if(divisibility == 1) {
+                result = "true"; 
+            } else {
+                result = "false";
+            }
+            
+        } else {
+            
+            result = "error";
+            
+        }
+        
+        callback(result);
+        
+    })
+}
 
 function assetid(asset_name) {
     
