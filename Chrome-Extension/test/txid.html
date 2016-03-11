@@ -49,18 +49,76 @@ console.log(reverseBytes(secondSHA));
 console.log("4f0307d0cffbd37bbb6de8a4d2ffedabf700ecc421a4a017762e6f3bb9c64dff");
 
     
-$.getJSON( "https://poloniex.com/public?command=returnOrderBook&currencyPair=BTC_LTBC&depth=1", function( data ) {
-    var btcrate = data.asks[0][0];
+//$.getJSON( "https://poloniex.com/public?command=returnOrderBook&currencyPair=BTC_LTBC&depth=1", function( data ) {
+//    var btcrate = data.asks[0][0];
+//    
+//    $.getJSON( "https://poloniex.com/public?command=returnOrderBook&currencyPair=USDT_BTC&depth=1", function( data ) {
+//        var usdtrate = data.asks[0][0];
+//    
+//        var ltbperusdt = 1 / (parseFloat(btcrate)*parseFloat(usdtrate));    
+//        
+//        console.log(ltbperusdt);
+//
+//    });
+//});
     
-    $.getJSON( "https://poloniex.com/public?command=returnOrderBook&currencyPair=USDT_BTC&depth=1", function( data ) {
-        var usdtrate = data.asks[0][0];
+   
     
-        var ltbperusdt = 1 / (parseFloat(btcrate)*parseFloat(usdtrate));    
-        
-        console.log(ltbperusdt);
+    
+    
+//
+//    {
+//        "transaction_hash": "4693d2783f0e7ae38adda28d23612b0b23c451544778810f69dfb496beca1094",
+//        "output_index": 1,
+//        "amount": 7800,
+//        "script": "1 021a6532ce932d60a45e05c4ee767bbac3d77ee2f1fbd20dadfee54105e8bcd216 02a11a1175baca95a5a7a92bf6ec366454826753ca43ad1ff74a6299caaf2aaa92 03dc85ec20c45e703097c529035402b28e3deef0ec930e2f3fc2d6e2f1b417315c 3 OP_CHECKMULTISIG",
+//        "script_hex": "5121021a6532ce932d60a45e05c4ee767bbac3d77ee2f1fbd20dadfee54105e8bcd2162102a11a1175baca95a5a7a92bf6ec366454826753ca43ad1ff74a6299caaf2aaa922103dc85ec20c45e703097c529035402b28e3deef0ec930e2f3fc2d6e2f1b417315c53ae",
+//        "script_type": "multisig",
+//        "addresses": [
+//        "1C2dWhQHj8Wx319CdJcXi55zbshFkVUFXX"
+//        ],
+//        "spent": false,
+//        "confirmations": 52660
+//    }    
+//    
+//    01000000   
+//    019410cabe96b4df690f8178475451c4230b2b61238da2dd8ae37a0e3f78d29346 
+//    01000000695121
+//    021a6532ce932d60a45e05c4ee767bbac3d77ee2f1fbd20dadfee54105e8bcd216
+//    21
+//    02a11a1175baca95a5a7a92bf6ec366454826753ca43ad1ff74a6299caaf2aaa92
+//    21
+//    03dc85ec20c45e703097c529035402b28e3deef0ec930e2f3fc2d6e2f1b417315c   
+//    53aeffffffff01901a0000000000001976a91478f8473cfd25f0b8d889a46f65a4d53ffc3a59a088ac00000000 
 
-    });
-});
+    
+    
+    
+//{
+//    "transaction_hash": "8e42213ad13eb262a41c13e468111d457dbccdf5fd8a2f5fa1fec04509bcd507",
+//    "output_index": 1,
+//    "amount": 7800,
+//    "script": "1 02aaf57a1b1b102d78ba4524d88f8ea2336b60e005bdced7bf11fd5689707d78a1 02dca709227e4a792173475d1f8008e21271849302176760aef82e46281ff58b1b 03dc85ec20c45e703097c529035402b28e3deef0ec930e2f3fc2d6e2f1b417315c 3 OP_CHECKMULTISIG",
+//    "script_hex": "512102aaf57a1b1b102d78ba4524d88f8ea2336b60e005bdced7bf11fd5689707d78a12102dca709227e4a792173475d1f8008e21271849302176760aef82e46281ff58b1b2103dc85ec20c45e703097c529035402b28e3deef0ec930e2f3fc2d6e2f1b417315c53ae",
+//    "script_type": "multisig",
+//    "addresses": [
+//    "1C2dWhQHj8Wx319CdJcXi55zbshFkVUFXX"
+//    ],
+//    "spent": false,
+//    "confirmations": 52385
+//}   
+//    
+//
+//    01000000
+//    0107d5bc0945c0fea15f2f8afdf5cdbc7d451d1168e4131ca462b23ed13a21428e
+//    01000000695121
+//    02aaf57a1b1b102d78ba4524d88f8ea2336b60e005bdced7bf11fd5689707d78a1
+//    21
+//    02dca709227e4a792173475d1f8008e21271849302176760aef82e46281ff58b1b
+//    21
+//    03dc85ec20c45e703097c529035402b28e3deef0ec930e2f3fc2d6e2f1b417315c
+//    53aeffffffff01901a0000000000001976a91478f8473cfd25f0b8d889a46f65a4d53ffc3a59a088ac00000000
+    
 
 </script>
 </head>

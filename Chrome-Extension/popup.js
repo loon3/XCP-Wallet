@@ -432,6 +432,8 @@ function getPrimaryBalanceBTC(pubkey){
 
 function getPrimaryBalance(pubkey){
     
+    $("#xcpaddress").html(pubkey);
+    
     var addressbox = $("#sendtoaddress").val();
     
     if (addressbox.length == 0) {
@@ -439,16 +441,22 @@ function getPrimaryBalance(pubkey){
     }
     
     var currenttoken = $(".currenttoken").html();
+    
+    getLastAddr(function(addr){
+        
+        if(addr.length > 0) { pubkey = addr; }
    
-    if (currenttoken != "BTC") {
+        if (currenttoken != "BTC") {
+
+            getPrimaryBalanceXCP(pubkey, currenttoken);
+
+        } else {
+
+            getPrimaryBalanceBTC(pubkey);
+
+        }
         
-        getPrimaryBalanceXCP(pubkey, currenttoken);
-        
-    } else {
-    
-        getPrimaryBalanceBTC(pubkey);
-    
-    }
+    });
         
 }
 
@@ -590,19 +598,19 @@ function getRate(assetbalance, pubkey, currenttoken){
     getBTCBalance(pubkey);
 }
 
-
-function convertPassphrase(m){
-    var HDPrivateKey = bitcore.HDPrivateKey.fromSeed(m.toHex(), bitcore.Networks.livenet);
-    var derived = HDPrivateKey.derive("m/0'/0/" + 0);
-    var address1 = new bitcore.Address(derived.publicKey, bitcore.Networks.livenet);
-    var pubkey = address1.toString();    
-    
-    $("#xcpaddressTitle").show();
-    $("#xcpaddress").html(pubkey);
-    
-    getPrimaryBalance(pubkey);
-    
-}
+//
+//function convertPassphrase(m){
+////    var HDPrivateKey = bitcore.HDPrivateKey.fromSeed(m.toHex(), bitcore.Networks.livenet);
+////    var derived = HDPrivateKey.derive("m/0'/0/" + 0);
+////    var address1 = new bitcore.Address(derived.publicKey, bitcore.Networks.livenet);
+////    var pubkey = address1.toString();    
+////    
+////    $("#xcpaddressTitle").show();
+////    $("#xcpaddress").html(pubkey);
+////    
+////    getPrimaryBalance(pubkey);
+//    
+//}
 
 function assetDropdown(m)
 {
@@ -622,8 +630,15 @@ function assetDropdown(m)
             var address1 = new bitcore.Address(derived.publicKey, bitcore.Networks.livenet);
 
             var pubkey = address1.toString();
+            
+            if(data.last_address == pubkey){
+                var addrSelected = " selected";
+            } else {
+                var addrSelected = "";    
+            }
 
-            $(".addressselect").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'>"+pubkey+"</option>");
+
+            $(".addressselect").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'"+addrSelected+">"+pubkey+"</option>");
 
             if (i == 0) {
                 $(".addressselect").attr("title",pubkey);    
@@ -634,6 +649,18 @@ function assetDropdown(m)
         }
     
         $(".addressselect").append("<option label='--- Add New Address ---'>add</option>");
+        
+        
+        var current_addr = $(".addressselect").val();
+        
+            
+        $("#xcpaddressTitle").show();
+        $("#xcpaddress").html(current_addr);
+    
+        getPrimaryBalance(current_addr);
+        
+        
+        loadAddresslist();
         
     }); 
                  
@@ -667,29 +694,39 @@ function dynamicAddressDropdown(addresslabels, type)
         var pubkey = address1.toString();
         
         //$(".addressselect").append("<option label='"+pubkey+"'>"+pubkey+"</option>");
-        
+
+
         $(".addressselect").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'>"+pubkey+"</option>");
+     
     }
     
   
     
     
     $(".addressselect").append("<option label='--- Add New Address ---'>add</option>");
-       
-    if (type == "newaddress") {
-        getBTCBalance(pubkey);
-        var newaddress_position = parseInt(currentsize) - 1;
+
+    storeLastAddr(pubkey, function(){
+    
+        if (type == "newaddress") {
+
+                getBTCBalance(pubkey);
+                var newaddress_position = parseInt(currentsize) - 1;
+                var newaddress_select = "#walletaddresses option:eq("+newaddress_position+")";
+                var newaddress_val = $(newaddress_select).val();
+                $("#xcpaddress").html(newaddress_val);
+                getPrimaryBalance(newaddress_val);
+           
+        } else {
+            var newaddress_position = addressindex;
+        }
+    
+    
         var newaddress_select = "#walletaddresses option:eq("+newaddress_position+")";
-        var newaddress_val = $(newaddress_select).val();
-        $("#xcpaddress").html(newaddress_val);
-        getPrimaryBalance(newaddress_val);
-    } else {
-        var newaddress_position = addressindex;
-    }
-    
-    
-    var newaddress_select = "#walletaddresses option:eq("+newaddress_position+")";
-    $(newaddress_select).attr('selected', 'selected');
+        $(newaddress_select).attr('selected', 'selected');
+        
+        loadAddresslist();
+        
+    }) 
     
 }
 
@@ -713,13 +750,14 @@ function newPassphrase()
                         'encrypted': false,
                         'firstopen': false,
                         'addressinfo': addressinfo,
-                        'totaladdress': 5
+                        'totaladdress': 5,
+                        'last_address': ""
                         
                     }, function () {
                         
                         //resetFive();
                         //$(".hideEncrypted").show();
-                        convertPassphrase(m);
+                        //convertPassphrase(m);
                         assetDropdown(m);
                         $('#allTabs a:first').tab('show');
                     
@@ -737,7 +775,7 @@ function existingPassphrase(string) {
     
     $("#newpassphrase").html(string);
        
-    convertPassphrase(m2);    
+    //convertPassphrase(m2);    
     checkImportedLabels(m2, assetDropdown);
 
     
@@ -766,10 +804,11 @@ function manualPassphrase(passphrase) {
                     {
                         'passphrase': string,
                         'encrypted': false,
-                        'firstopen': false
+                        'firstopen': false,
+                        'last_address': ""
                     }, function () {
                     
-                        convertPassphrase(m2);
+                        //convertPassphrase(m2);
                         assetDropdown(m2);
     
                         //$(".hideEncrypted").show();
@@ -783,7 +822,7 @@ function manualPassphrase(passphrase) {
 }
 
 
-function loadAssetsDex(add) {
+function loadAssetsDex(add, callback) {
     
     $("#dexSellAssets").hide();
     $("#dexSellAssets-working").show();
@@ -834,8 +873,14 @@ function loadAssetsDex(add) {
                 }           
             })
             
+            
+            
+            
             $("#dexSellAssets").show();
             $("#dexSellAssets-working").hide();
+            
+            
+            callback();
         })
         
     })
@@ -916,7 +961,7 @@ function loadAssets(add) {
                 $("#sellAssetBal").html("Bal: "+xcpbalance)
                 $("#dexSellAssets").data("XCP", { bal: xcpbalance });
             }
-
+                
                     $.each(data.data, function(i, item) {
                         var assetname = data.data[i].asset;
                         var assetbalance = data.data[i].amount; //.balance for blockscan
@@ -924,10 +969,28 @@ function loadAssets(add) {
                         if (assetbalance.indexOf(".")==-1) {var divisible = "no";} else {var divisible = "yes";}
 
                         var iconname = assetname.toLowerCase();
-                        var iconlink = "http://counterpartychain.io/content/images/icons/"+iconname+".png";
+                        
+                        var iconlink = "<img src='http://counterpartychain.io/content/images/icons/"+iconname+".png'>";
 
                         if (assetname.charAt(0) != "A") {
-                            var assethtml = "<div class='singleasset row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div class='assetname'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+                            
+                            //for
+                        
+                    
+                                for(var k = 0; k < SOGTileArray.length; k++) {
+
+                                    if (assetname == SOGTileArray[k][2]) {
+                                        
+                                        iconlink = "<img src='https://sogassets.com"+SOGTileArray[k][0]+"' height='48px' width='48px'>";
+
+                                        break;
+
+                                    }
+
+                                }
+
+                            
+                            var assethtml = "<div class='singleasset row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'>"+iconlink+"</div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div class='assetname'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
                             //3082B0
                             //$( "#allassets" ).append( assethtml );
                             
@@ -942,60 +1005,60 @@ function loadAssets(add) {
 
                         } else {
                             
-                            getSubassetsLocal(function(rn){
-                                
-                                var subasset_local = false;
-                                
-                                if(rn != undefined) {
-                                
-                                    for(var i = 0; i < rn.length; i++){
+//                            getSubassetsLocal(function(rn){
+//                                
+//                                var subasset_local = false;
+//                                
+//                                if(rn != undefined) {
+//                                
+//                                    for(var i = 0; i < rn.length; i++){
+//
+//                                        if(rn[i]["r"] == assetname) {
+//
+//                                            var subasset_local = rn[i]["n"];
+//
+//                                        } 
+//
+//                                    }
+//                                    
+//                                }
+//                                
+//                                if(subasset_local == false) {
+//                            
+//                                    findSubassetGrand(assetname, function(subasset) {
+//
+//                                        if(subasset != "error" && subasset != undefined) {
+//
+//                                            rn_array = rn_array.concat({r: assetname, n: subasset});
+//
+//                                            var subasset_lb = subasset.replace(/\./g, "<br>");
+//
+//                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'>"+iconlink+"</div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+//
+//                                        } else {
 
-                                        if(rn[i]["r"] == assetname) {
-
-                                            var subasset_local = rn[i]["n"];
-
-                                        } 
-
-                                    }
-                                    
-                                }
-                                
-                                if(subasset_local == false) {
-                            
-                                    findSubassetGrand(assetname, function(subasset) {
-
-                                        if(subasset != "error" && subasset != undefined) {
-
-                                            rn_array = rn_array.concat({r: assetname, n: subasset});
-
-                                            var subasset_lb = subasset.replace(/\./g, "<br>");
-
-                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-
-                                        } else {
-
-                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div class='assetname-numeric'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-
-                                        }
+                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'>"+iconlink+"</div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div class='assetname-numeric'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+//
+//                                        }
 
                                         $( "#allassets" ).append( assethtml );
 
-                                    });
-                                    
-                                } else {
-                                    
-                                    var subasset_lb = subasset_local.replace(/\./g, "<br>");
-
-                                    var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-                                    
-                                    $( "#allassets" ).append( assethtml );
-                                    
-                                }
-                                    
-                                    
-                                
-  
-                            });
+//                                    });
+//                                    
+//                                } else {
+//                                    
+//                                    var subasset_lb = subasset_local.replace(/\./g, "<br>");
+//
+//                                    var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+//                                    
+//                                    $( "#allassets" ).append( assethtml );
+//                                    
+//                                }
+//                                    
+//                                    
+//                                
+//  
+//                            });
                             
                             
                         }
@@ -1094,21 +1157,21 @@ function loadAssets(add) {
                 }, 1500);  
         
         
-                setTimeout(function(){  
-                    
-                    
-                    if(rn_array.length > 0) {
-                        
-                        storeSubasset(rn_array, function(){
-                            
-                            var rn_array = new Array();
-                            
-                        });
-                        
-                    }
-                    
-                    
-                }, 2000)
+//                setTimeout(function(){  
+//                    
+//                    
+//                    if(rn_array.length > 0) {
+//                        
+//                        storeSubasset(rn_array, function(){
+//                            
+//                            var rn_array = new Array();
+//                            
+//                        });
+//                        
+//                    }
+//                    
+//                    
+//                }, 2000)
 
                 //loadTransactions(add);
             
@@ -1258,7 +1321,7 @@ function loadTransactions(add, btctxs) {
     
         loadTransactionsBTC(add, function(add, btctxs) { //{"address":"1CWpnJVCQ2hHtehW9jhVjT2Ccj9eo5dc2E","asset":"LTBCOIN","block":348621,"quantity":"-50000.00000000","status":"valid","time":1426978699,"tx_hash":"dc34bbbf3fa02619b2e086a3cde14f096b53dc91f49f43b697aaee3fdec22e86"}
             
-            getSubassetsLocal(function(rn){
+         //   getSubassetsLocal(function(rn){
                                       
                 var source_html = "https://counterpartychain.io/api/transactions/"+add;
 
@@ -1276,19 +1339,19 @@ function loadTransactions(add, btctxs) {
 
                             var assetname = data.data[i].asset;
                             
-                            if(rn != undefined) {
-
-                                for(var j = 0; j < rn.length; j++){
-
-                                    if(rn[j]["r"] == data.data[i].asset) {
-
-                                        assetname = rn[j]["n"].replace(/\./g, "<br>");
-
-                                    } 
-
-                                }
-
-                            }
+//                            if(rn != undefined) {
+//
+//                                for(var j = 0; j < rn.length; j++){
+//
+//                                    if(rn[j]["r"] == data.data[i].asset) {
+//
+//                                        assetname = rn[j]["n"].replace(/\./g, "<br>");
+//
+//                                    } 
+//
+//                                }
+//
+//                            }
 
                             
                             var address = data.data[i].address;
@@ -1412,7 +1475,7 @@ function loadTransactions(add, btctxs) {
 
                 });
 
-            });
+        //    });
 
         });
         
@@ -1447,6 +1510,10 @@ function sendtokenaction() {
             console.log(sendtoamount);
             
             var minersfee = 0.0001;
+    
+            var minersfee_custom = $("#sendtotxfee").val();
+    
+            if(minersfee_custom > minersfee) {minersfee = minersfee_custom;}
     
             if (currenttoken == "BTC") {
             
@@ -1549,7 +1616,7 @@ function resetFive() {
                     var array = string.split(" ");
                     m = new Mnemonic(array);
                         
-                    convertPassphrase(m);
+                    //convertPassphrase(m);
                     assetDropdown(m);
                     $('#allTabs a:first').tab('show');
                     
@@ -1890,9 +1957,16 @@ function loadAddresslist() {
         
         //$(".addressselect").append("<option label='"+pubkey+"'>"+pubkey+"</option>");
         
-        $(".addressselectnoadd").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'>"+pubkey+"</option>");
-        $(".addressselectdex").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'>"+pubkey+"</option>");
+        if(data.last_address == pubkey){
+            var addrSelected = " selected";
+        } else {
+            var addrSelected = "";    
+        }
+        
+        $(".addressselectnoadd").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'"+addrSelected+">"+pubkey+"</option>");
+        $(".addressselectdex").append("<option label='"+addresslabels[i].label+"' title='"+pubkey+"'"+addrSelected+">"+pubkey+"</option>");
     }
+        
     
     });
 };
@@ -2308,6 +2382,34 @@ function getSubassetsLocal(callback){
  })
  
 }
+
+function storeLastAddr(addr, callback) {
+    
+    chrome.storage.local.set(
+            {
+
+                'last_address': addr
+
+            }, function (){
+
+               callback();
+
+            });
+                   
+}
+
+
+function getLastAddr(callback){
+    
+ chrome.storage.local.get(function(data) {
+     
+     callback(data["last_address"]);
+     
+ })
+ 
+}
+
+
 //        
 //        if(typeof(data["bvamwt_enabled"]) !== 'undefined') { 
 

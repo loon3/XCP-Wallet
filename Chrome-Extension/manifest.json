@@ -32,6 +32,7 @@
         "js/aes.js",
         "js/biginteger.js",
         "js/utxo.js",
+        "js/sog.js",
         "js/xcp-js/transactions.js",
         "js/xcp-js/rc4.js",
         "js/xcp-js/convert-type.js",

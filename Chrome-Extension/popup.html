@@ -3,7 +3,7 @@
 <html>
 <head>
 	
-<title></title>
+<title>XCP Wallet</title>
     
          
     <script src="js/jquery.min.js"></script>
@@ -13,6 +13,7 @@
     <script src="js/aes.js"></script>
     <script src="js/biginteger.js"></script>
     <script src="js/utxo.js"></script>
+    <script src="js/sog.js"></script>
     
     <script src="js/xcp-js/transactions.js"></script>
     <script src="js/xcp-js/rc4.js"></script>
@@ -200,7 +201,7 @@
        
         </div>        
            
-           
+         
  <div id="navbar" class="navbar-collapse collapse">          
            
 <!--  <ul class="nav nav-tabs" id="allTabs">-->
@@ -236,9 +237,9 @@
       </div>
     </nav>
         </div>
-
+<div id="content">
   <!-- Tab panes -->
-  <div class="tab-content" style="margin-top: 70px;">
+  <div class="tab-content">
     <div class="tab-pane active" id="walletPage">
         
         
@@ -345,15 +346,31 @@
 <!--            <div style="display: inline-block;" class="sendlabel"></div>-->
         <div align="center" style="width: 100%; margin: auto;"><input type="text" class="form-control" id="sendtoaddress" style="border: 1px solid #000; text-align: left;"></div>
             
-            <div align="left" class="inputtitle" style="padding: 12px 0 2px 0;">AMOUNT TO SEND:<div id="sendUSD" style="display: inline-block; padding-left: 10px;"></div></div>
-            
-
-            
-            <div align="center" style="width: 100%; margin: auto;"><input type="text" class="form-control" id="sendtoamount" style="border: 1px solid #000; text-align: left;"></div>
             
             
+            <div class="row">
+                
+                <div class="col-xs-8">
+                    
+                    <div align="left" class="inputtitle" style="padding: 12px 0 2px 0;">AMOUNT TO SEND:</div>
             
+            <div align="center" style="width: 100%; margin: auto;"><input type="text" class="form-control sendtoUSD" id="sendtoamount" style="border: 1px solid #000; text-align: left;" maxlength="10"></div>
+                    
+            
+                </div>
+                
+                <div class="col-xs-4">
+                    
+                    <div align="left" class="inputtitle" style="padding: 12px 0 2px 0;">TX FEE:</div>
+            
+            <div align="center" style="width: 100%; margin: auto;"><input type="text" class="form-control sendtoUSD" id="sendtotxfee" style="border: 1px solid #000; text-align: left;" value="0.0001"></div>
+                    
+                    </div>
+                
+                
+            </div>
         
+            <div id="sendUSD" align="center" style="padding: 10px 0 0 0;"></div>
             
             
             
@@ -367,7 +384,12 @@
     <div class="tab-pane" id="transactionPage">
 <!--        <div style="padding: 10px;"><button id="assettransactiontoggle" class="btn btn-default btn-block btn-sm" style="width: 100%;">View Token Transaction History</button></div>-->
 		
-        
+        <div class="form-group" style="margin: -10px 10px 10px 10px;">
+      
+            <div style="width: 100%;">
+                <select id="transactionsAddress" class="addressselectdex form-control" style="font-size: 12px;"></select>
+            </div>
+        </div>
         
         <div id="alltransactions" style="margin-top: 0px; padding-bottom: 20px;"></div>
         
@@ -378,7 +400,14 @@
     </div>
       <div class="tab-pane" id="inventoryPage">
 <!--        <div style="padding: 10px;"><button id="assettransactiontoggle" class="btn btn-default btn-block btn-sm" style="width: 100%;">View Token Transaction History</button></div>-->
-		
+          
+          
+		 <div class="form-group" style="margin: -10px 10px 10px 10px;">
+      
+            <div style="width: 100%;">
+                <select id="assetsAddress" class="addressselectdex form-control" style="font-size: 12px;"></select>
+            </div>
+        </div>
         
           
         <div id="allassets" style="padding-bottom: 20px;"></div>
@@ -429,7 +458,7 @@
                         <a id="DEXTool" href="#dexPage" data-toggle="tab">
              <div class="col-xs-4 toolicon activetool" align="center"> 
                 <i class="fa fa-exchange fa-3x"></i>
-                <div class="small" style="padding: 10px 5px 5px 5px;">Decentralized Exchange</div>
+                <div class="small" style="padding: 10px 5px 5px 5px;">Asset Exchange (DEX)</div>
             </div>
                 </a>
             
@@ -469,8 +498,15 @@
                   <input type="text" class="form-control" id="receiver-encrypt" style="font-size: 12px;" value="">
                 </div>
                 <div class="form-group">
-                  <label for="sender-encrypt">Sent From:</label>
-                  <input type="text" class="form-control" style="font-size: 12px;" id="sender-encrypt" value="" disabled>
+                  <label for="sender-encrypt">Send From:</label>
+                    
+                    <div style="width: 100%;">
+                        <select id="sender-encrypt" class="addressselectdex form-control" style="font-size: 12px;"></select>
+                    </div>
+
+                    
+                    
+<!--                  <input type="text" class="form-control" style="font-size: 12px;" id="sender-encrypt" value="" disabled>-->
                 </div>
                 <div id="decrypted-message-window">
                     <div class="form-group">
@@ -515,17 +551,17 @@
                     <div class="h3" align="center">Decentralized Exchange</span></div>
                 </div>
           
-          <div class="row" id="dexOptions" style="padding: 20px 0 50px 0;" align="center">
+          <div class="row" id="dexOptions" style="padding: 20px 30px 50px 30px;" align="center">
           
                 <div class="col-xs-12" style="padding-bottom: 15px;">
-                    <button id="browseDexOrders" type="button" class="btn btn-info">Browse Market</button>
+                    <button id="browseDexOrders" type="button" class="btn btn-info btn-block">View Active Markets</button>
                 </div>
                 <div class="col-xs-12" style="padding-bottom: 15px;">
-                    <button id="buynewDex" type="button" class="btn btn-warning">Create New Order</button>
+                    <button id="buynewDex" type="button" class="btn btn-warning btn-block">Create a New Order</button>
                 </div>
               
                <div class="col-xs-12" style="padding-bottom: 15px;">
-                    <button id="openOrdersDex" type="button" class="btn btn-primary">View Your Open Orders</button>
+                    <button id="openOrdersDex" type="button" class="btn btn-primary btn-block">View / Cancel Orders</button>
                 </div>
                   
                 
@@ -623,7 +659,7 @@
                                 <input type="text" style="font-size: 12px;" name="get_quantity" value="0" class="form-control" id="getQuantityInput" placeholder="0">
                                                             </div>
                             <div class="col-xs-6" id="get_asset">
-                                <input type="text"  style="font-size: 12px;" name="get_asset" value="" class="form-control typeahead" id="getAssetInput" placeholder="XCP">
+                                <input type="text"  style="font-size: 12px;" name="get_asset" value="" class="form-control typeahead" id="getAssetInput" placeholder="Asset Name" maxlength="12">
                                                             </div>
                         </div>
                     </div>
@@ -863,13 +899,13 @@
                 
                 <p><img src="images/icon-128.png"></p>
                 <h3>XCP Wallet</h3>
-                <p style="padding-top: 10px;">Powered by APIs from Blockr.io, Insight.is, Chain.so, and Counterpartychain.io</p>
+                <p style="padding-top: 10px;">Powered by APIs from Blockchain.info, Blockr.io, Insight.is, Chain.so, and Counterpartychain.io</p>
                 <p>Source code is available on Github at<br> <span style="font-weight: bold; font-size: 12px;">https://github.com/loon3/XCP-Wallet</span></p>
                 <p>Please report any bugs or issues to the Issues section of the Github repository</p> 
                 
                 <p>
                 <span style="font-decoration: underline;">Donation Address:</span><br>
-                <span style="font-weight: bold; font-size: 13px;" class="movetosend">17dkGdRKxF3RC9Vb36RZCYjYPfbx9GAiW4</span>
+                <span style="font-weight: bold; font-size: 13px;" class="movetosend">17DrgWGhotqei4aUaDPyCHExUbeEeSXuDg</span>
                 </p>
             
             </div> 
@@ -879,12 +915,14 @@
       
       
 	</div>  
+           
+            <div id="footer"><div id="nameversion" style="float: left; padding:1px 0 0 8px;"></div><div id="ejectbutton" style="padding: 0 10px 0 0; margin-left: -10px; cursor: pointer;"><i class="fa fa-eject"></i></div><div id="refreshWallet"><i class="fa fa-refresh"></i></div></div> 
       
-    
+    </div>
     
   </div>
 
- <div id="footer"><div id="nameversion" style="float: left; padding:1px 0 0 8px;"></div><img id="refreshWallet" src="refresh.png" height="16" width="16"></div>       
+      
         
 </div>
 

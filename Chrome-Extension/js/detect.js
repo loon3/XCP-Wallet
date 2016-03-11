@@ -35,74 +35,93 @@ chrome.storage.local.get(function(data) {
 
                     // check for a send (action type 00000000)
                     var action_type = data_chunk.substring(18, 26);
-                    if (action_type != '00000000') { return; }
+                    if (action_type == '00000000') { 
 
-                    var asset = data_chunk.substring(26, 42);
-                    var amount = data_chunk.substring(42, 58);
+                        var asset = data_chunk.substring(26, 42);
+                        var amount = data_chunk.substring(42, 58);
 
-                    //var asset_dec = parseInt(asset, 16);
-                    var asset_dec = hexToDec(asset);
+                        //var asset_dec = parseInt(asset, 16);
+                        var asset_dec = hexToDec(asset);
 
-                    console.log(asset_dec);
-                    var amount_dec = hexToDec(amount) / 100000000;
-                    console.log("asset id: "+asset_dec);
+                        console.log(asset_dec);
+                        var amount_dec = hexToDec(amount) / 100000000;
+                        console.log("asset id: "+asset_dec);
 
-                    var numeric_lowerlimit = Math.pow(26, 12) + 1;
+                        var numeric_lowerlimit = Math.pow(26, 12) + 1;
 
-                    console.log(numeric_lowerlimit);
+                        console.log(numeric_lowerlimit);
 
-                    if (asset_dec > numeric_lowerlimit) {
+                        if (asset_dec > numeric_lowerlimit) {
 
-                        var assetnamed = "A"+asset_dec;
+                            var assetnamed = "A"+asset_dec;
+
+                            console.log(assetname(asset_dec));
+
+                        } else {
+
+                            var assetnamed = assetname(asset_dec);    
+
+                        }
+
+                        console.log(assetnamed);
+
+                        var source_html = "https://counterpartychain.io/api/asset/"+assetnamed;
+
+                    //    loadBvam(function(bvamdata, hashname, hashhash){
+
+                            $.getJSON( source_html, function( data ) {
+
+                                if (data.divisible == 0) { amount_dec = Math.round(amount_dec * 100000000); }
+
+                                console.log(assetnamed.substr(0,1));
+
+                                if (assetnamed.substr(0,1) != "A") {
+
+                                    $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;'>"+assetnamed+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><p style='font-size: 16px; padding-top: 30px;' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></p></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+
+                                } else {
+
+                                    findSubassetGrand(assetnamed, function(subasset) {
+
+                                        if(subasset != "error" && subasset != undefined) {
+
+                                            var subasset_lb = subasset.replace(/\./g, "<br>");
+
+                                            $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+subasset_lb+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><div style='font-size: 16px; padding: 15px 0 15px 0;' class='col-xs-12' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></div></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+
+                                        } else {
+
+                                            $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+assetnamed+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><p style='font-size: 16px; padding-top: 30px;' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></p></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+
+                                        }
+
+
+                                    });
+
+
+
+                                }
+
+                            });
                         
-                        console.log(assetname(asset_dec));
-
-                    } else {
-
-                        var assetnamed = assetname(asset_dec);    
-
-                    }
-
-                    console.log(assetnamed);
-
-                    var source_html = "https://counterpartychain.io/api/asset/"+assetnamed;
-                    
-                //    loadBvam(function(bvamdata, hashname, hashhash){
-
-                        $.getJSON( source_html, function( data ) {
-
-                            if (data.divisible == 0) { amount_dec = Math.round(amount_dec * 100000000); }
-
-                            console.log(assetnamed.substr(0,1));
+                        } else if(action_type == '0000000a') {  
                             
-                            if (assetnamed.substr(0,1) != "A") {
+//                            00098b174a7d3945  = Asset to Sell = 2686206940625221 = TATIANACOIN (hex to dec)
+//                            00000022ecb25c00  = Amount to Sell = 150000000000 (hex to dec)
+//                            0000000000000001  = Asset to Buy = 1 = XCP (hex to dec)
+//                            0000000035a4e900  = Amount to Buy = 900000000 (hex to dec)
 
-                                $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;'>"+assetnamed+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><p style='font-size: 16px; padding-top: 30px;' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></p></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
-                                
-                            } else {
-                                
-                                findSubassetGrand(assetnamed, function(subasset) {
-
-                                    if(subasset != "error" && subasset != undefined) {
-
-                                        var subasset_lb = subasset.replace(/\./g, "<br>");
-
-                                        $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+subasset_lb+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><div style='font-size: 16px; padding: 15px 0 15px 0;' class='col-xs-12' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></div></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
-
-                                    } else {
-
-                                        $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Transaction Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+assetnamed+"</p></div><div class='col-xs-6'><p align='center'>Amount Sent:</p><p style='font-size: 24px; font-weight: bold; color: #ED1650;' >"+amount_dec+"</p></div><p style='font-size: 16px; padding-top: 30px;' >Sent to: <a href='https://counterpartychain.io/transaction/"+txid+"'>"+sendaddress+"</a></p></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
-
-                                    }
-
-
-                                });
-
-                                
-                                
-                            }
+                        var asset_tosell = data_chunk.substring(26, 42);
+                        var amount_tosell = data_chunk.substring(42, 58);                            
                             
-                        });
+                            
+                            $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Order Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset to Sell:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+asset_tosell+"</p></div><div class='col-xs-6'><p align='center'>Asset to Buy:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;' >"+amount_tosell+"</p></div></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+                            
+                        } else {
+                         
+                         return;   
+                            
+                        }
                 });
                 
             }

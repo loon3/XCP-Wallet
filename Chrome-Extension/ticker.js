@@ -29,7 +29,7 @@ $( document ).ready(function() {
     
     setPinBackground();
     
-    $('#alltransactions').hide();
+//    $('#alltransactions').hide();
     
     $('#yourtxid').on('click', 'a', function(){
      chrome.tabs.create({url: $(this).attr('href')});
@@ -46,7 +46,7 @@ $( document ).ready(function() {
     
     
     $("#pinsplash").hide();
-    $('#alltransactions').hide();
+ //   $('#alltransactions').hide();
 
     getStorage();
     //setEncryptedTest();
@@ -120,6 +120,8 @@ $( document ).ready(function() {
     
     $( "#walletaddresses" ).change(function () {
         
+        
+        
          $("#sendtokenbutton").prop('disabled', false);
         
         $( "#btcbalance" ).html("<div style='font-size: 12px;'>Thinking...</div>");
@@ -151,8 +153,10 @@ $( document ).ready(function() {
 
             $("#xcpaddress").html(addr);
 
-           
-                getPrimaryBalance(addr);
+           storeLastAddr(addr, function(){
+               $(".addressselectdex").val(addr)
+               getPrimaryBalance(addr)
+           });
               
                     
 //                    });
@@ -233,13 +237,14 @@ $( document ).ready(function() {
         var address = $("#xcpaddress").html();
         
         copyToClipboard(address);
-        
+
         $('#xcpaddressTitle').hide(); 
         $('#addresscopied').show();
         setTimeout(function(){ 
             $('#addresscopied').hide(); 
             $('#xcpaddressTitle').show();
         }, 1500);
+      
         
     });
     
@@ -391,6 +396,11 @@ $( document ).ready(function() {
     
     $('#sendAssetButton').click( function () {
         
+        var txfee = $("#sendtotxfee").val();
+        if(isNaN(txfee) == true || txfee < 0.0001){txfee = 0.0001;}
+        var ltbtousd = $("#ltbPrice").data("btc").price;
+        var txfeeinusd = parseFloat(txfee) / parseFloat(ltbtousd);
+        $("#sendUSD").html("($"+txfeeinusd.toFixed(2)+" fee)");
         
         
         $("#btcsendbox").toggle();
@@ -512,6 +522,15 @@ $(document).on("click", '.tokenlisting', function (event)
       
   });
     
+    $(document).on('click', '#ejectbutton', function(){
+        
+        var extension_url = "chrome-extension://"+chrome.runtime.id+"/popup.html";
+    
+        chrome.windows.create({url: extension_url, width: 400, height: 600});
+    
+    
+    });
+    
   $(document).on("click", '#refreshWallet', function (event)
   {
       
@@ -534,9 +553,9 @@ $(document).on("click", '.tokenlisting', function (event)
       
       $("#currenttoken-pending").html("");
 
-      $("#ltbDirectorySearchResults").html("");
-      $("#ltbUserSearch").val("");
-      //$("#searchLTBuser").text("Search");
+//      $("#ltbDirectorySearchResults").html("");
+//      $("#ltbUserSearch").val("");
+//      //$("#searchLTBuser").text("Search");
 
       $("#freezeUnconfirmed").css("display", "none");
       $("#mainDisplay").css("display", "block");
@@ -550,6 +569,8 @@ $(document).on("click", '.tokenlisting', function (event)
       $("#sendtoamount").val("");
 
       $(".sendlabel").html("");
+      $("#sendUSD").html("");
+      $("#sendtotxfee").val(0.0001);
       
       var assetbalance = $("#xcpbalance").html();
       var array = assetbalance.split(" ");
@@ -658,6 +679,9 @@ $(document).on("click", '.tokenlisting', function (event)
     
      $(document).on("click", '.movetosend', function (event)
   {  
+//      var currentaddr = $("#assetsAddress").val();
+//      
+//      $("#walletaddresses").val(currentaddr);
   
       var sendaddress = $( this ).text();
       
@@ -679,6 +703,8 @@ $(document).on("click", '.tokenlisting', function (event)
 
   $('#transactionTab').click(function ()
   {
+      
+      
     
     //$('.bg').css({"width":"320px"});  
       
@@ -691,23 +717,54 @@ $(document).on("click", '.tokenlisting', function (event)
 //            width: "320px"
 //        }, 100 );
       
-    var address = $("#xcpaddress").html();
+    //var address = $("#xcpaddress").html();
         
 //    if ($('#assettransactiontoggle').html() == "View Tokens") {
       $('#alltransactions').show();
-        loadTransactions(address);
+      
+      
+
+      
 //    } else {
 //        loadAssets(address);
 //    }
 //      
+              //var address = $("#xcpaddress").html();
+      
+      
+//        var translisted = $("#alltransactions").html();
+//        var walletAddr = $("#walletaddresses").val();
+//        var assetAddr = $("#assetsAddress").val();
+        var transAddr = $("#transactionsAddress").val();
+        
+//        if (translisted.length > 0 && walletAddr == transAddr && transAddr == assetAddr) {
+//        
+//        } else {
+     
+            loadTransactions(transAddr);
+   
+//        }
   });  
     
     $('#inventoryTab').click(function ()
     { 
+
         
-        var address = $("#xcpaddress").html();
-    
-    loadAssets(address);
+        //var address = $("#xcpaddress").html();
+        
+        
+//        var assetslisted = $("#allassets").html();
+//        var walletAddr = $("#walletaddresses").val();
+          var assetAddr = $("#assetsAddress").val();
+//        var transAddr = $("#transactionsAddress").val();
+        
+//        if (assetslisted.length > 0 && walletAddr == assetAddr && transAddr == assetAddr) {
+//        
+//        } else {
+
+                loadAssets(assetAddr);
+
+//        }
       
       });
     
@@ -722,6 +779,11 @@ $(document).on("click", '.tokenlisting', function (event)
         $('#buysellTab').css({"margin-left":"12px"});
         //$("#priceBox").show();
         $("#priceBoxBank").hide();
+        
+        getLastAddr(function(addr){
+            getPrimaryBalance(addr);
+        })        
+        
         
     });
     
@@ -878,76 +940,92 @@ $(document).on('click', '#toolsTab', function () {
     });
     
     
-    $(document).on("keyup", '#sendtoamount', function (event)
+    $(document).on("keyup", '.sendtoUSD', function (event)
     { 
         
         var sendamount = parseFloat($("#sendtoamount").val());
         var currenttoken = $(".currenttoken").html();
+        var btcbal = parseFloat($("#btcbalhide").html());
+        
+        var txfee = $("#sendtotxfee").val();
+        if(isNaN(txfee) == true || txfee < 0.0001){txfee = 0.0001; $("#sendUSD").html("Minimum fee is 0.0001 BTC"); return;}
+        var ltbtousd = $("#ltbPrice").data("btc").price;
+        var txfeeinusd = parseFloat(txfee) / parseFloat(ltbtousd);
         
         if (currenttoken == "BTC") {
-            var currentbalance = parseFloat($("#btcbalhide").html());
+            var currentbalance = btcbal;
+            var totalsendamount = sendamount + parseFloat(txfee);
         } else {
             var currentbalance = parseFloat($("#assetbalhide").html());
+            var totalsendamount = sendamount;
         }
         
         //console.log(sendamount);
         //console.log(currentbalance);
         
-        if (sendamount > currentbalance) {
+        
+        
+        
+        
+        
+        
+        
+        
+        if (totalsendamount > currentbalance || txfee > (btcbal + 0.00005470)) {
             $('#sendtokenbutton').prop('disabled', true);
        	} else {
             $("#sendtokenbutton").removeAttr("disabled");
         }
         
         
-        if (currenttoken == "BTC") {
-// || currenttoken == "XCP"
+        if (currenttoken == "BTC" || currenttoken == "XCP") {
             
             if (isNaN(sendamount) == false && $("#sendtoamount").filter(function() { return $(this).val(); }).length > 0){
             
+                var ltbtousd = $("#ltbPrice").data("btc").price;
+                var txfeeinusd = parseFloat(txfee) / parseFloat(ltbtousd);
                 
-          //      if (currenttoken == "BTC") {
+                if (currenttoken == "BTC") {
                     
-                    var ltbtousd = $("#ltbPrice").data("btc").price;
-                    var sendinusd = sendamount / parseFloat(ltbtousd);
+                    var sendinusd = sendamount / parseFloat(ltbtousd); 
             
-                    $("#sendUSD").html("($"+sendinusd.toFixed(2)+")");
+                    $("#sendUSD").html("($"+sendinusd.toFixed(2)+" + $"+txfeeinusd.toFixed(2)+" fee)");
                     
-           //     } 
-//                else {
-//                    
-//                    chrome.storage.local.get(["assetrates"], function (data)
-//                        {  
-//                            
-//                            for(i=0; i < data["assetrates"].length; i++){
-//                                
-//                                var findassetrate = data["assetrates"][i];
-//                                
-//                                if (data["assetrates"][i]["assetname"] == "XCP") {
-//                    
-//                                    var ltbtousd = data["assetrates"][i]["assetprice"];
-//                                    var sendinusd = sendamount * parseFloat(ltbtousd);
-//            
-//                                    $("#sendUSD").html("($"+sendinusd.toFixed(2)+")");
-//                    
-//                                    
-//                                }
-//                            
-//                            }
-//                            
-//                        })
-//                    
-//                }
+                } else {
+                    
+                    chrome.storage.local.get(["assetrates"], function (data)
+                        {  
+                            
+                            for(i=0; i < data["assetrates"].length; i++){
+                                
+                                var findassetrate = data["assetrates"][i];
+                                
+                                if (data["assetrates"][i]["assetname"] == "XCP") {
+                    
+                                    var ltbtousd = data["assetrates"][i]["assetprice"];
+                                    var sendinusd = sendamount * parseFloat(ltbtousd);
+            
+                                    $("#sendUSD").html("($"+sendinusd.toFixed(2)+" + $"+txfeeinusd.toFixed(2)+" fee)");
+                    
+                                    
+                                }
+                            
+                            }
+                            
+                        })
+                    
+                }
                 
  
             } else {
             
-                $("#sendUSD").html("");
+                $("#sendUSD").html("($"+txfeeinusd.toFixed(2)+" fee)");
             }
             
         } else {
             
-            $("#sendUSD").html("");
+            $("#sendUSD").html("($"+txfeeinusd.toFixed(2)+" fee)");
+                    
             
         }
         
@@ -1187,7 +1265,7 @@ $("#send-encrypt-message").click(function(){
 $("#DEXTool").click(function(){     
 
      var pubkey = $("#dexOrderAddress").val();   
-    loadAssetsDex(pubkey)  
+    loadAssetsDex(pubkey, function(){})  
     
     $("#createDexOrder").html("Create Order");
     $("#createDexOrder").prop('disabled', false);
@@ -1207,10 +1285,31 @@ $("#DEXTool").click(function(){
     
 
     
+$("#transactionsAddress").change(function(){
+    var addr = $("#transactionsAddress").val();  
+    storeLastAddr(addr, function(){
+        loadTransactions(addr)
+        $("#assetsAddress").val(addr); 
+        $("#walletaddresses").val(addr);
+    });
+})
+
+$("#assetsAddress").change(function(){
+    var addr = $("#assetsAddress").val();
+    $("#isbtcloading").html("true");
+    storeLastAddr(addr, function(){
+        loadAssets(addr);
+        $("#transactionsAddress").val(addr);  
+        $("#walletaddresses").val(addr);
+    });
+})
+    
 $("#dexOrderAddress").change(function(){     
 
-     var pubkey = $("#dexOrderAddress").val();   
-    loadAssetsDex(pubkey)  
+     var addr = $("#dexOrderAddress").val();   
+     storeLastAddr(addr, function(){
+         loadAssetsDex(addr, function(){})
+     });  
     
     //$("#giveQuantityInput").val("")
   
@@ -1254,6 +1353,15 @@ $("#createDexOrder").click(function(){
 
         console.log(sell_asset_balance);
         console.log(sell_qty);
+        
+        if($("#dexSellAssets").val() == "") {
+            return
+        }
+        
+        if(buy_asset < 4 || sell_asset > 12) {
+            return
+        }
+        
 
         if(parseFloat(sell_asset_balance) < parseFloat(sell_qty) || $("#giveQuantityInput").val() == "0" || $("#getQuantityInput").val() == "0") {
             
@@ -1277,7 +1385,7 @@ $("#createDexOrder").click(function(){
             
             var txsAvailable = $("#txsAvailable").html();
             
-            if ($.isNumeric(sell_qty) == true && $.isNumeric(buy_qty) == true && $.isNumeric(expiration) == true && buy_asset.length <= 12 && sell_asset.length <= 12 && expiration > 0 && expiration <= 65535 && txsAvailable > 1) {
+            if ($.isNumeric(sell_qty) == true && $.isNumeric(buy_qty) == true && $.isNumeric(expiration) == true && expiration > 0 && expiration <= 65535 && txsAvailable > 1) {
             
                 $("#createDexOrder").prop('disabled', true);
                 $("#createDexOrder").html("Creating New Order... <i class='fa fa-cog fa-spin'></i>");
@@ -1370,8 +1478,11 @@ $("#openOrdersDex").click(function(){
 
 $("#dexOpenOrdersAddress").change(function(){     
 
-    var pubkey = $("#dexOpenOrdersAddress").val();   
-    refreshOpenOrdersDex(pubkey);
+    var addr = $("#dexOpenOrdersAddress").val();   
+    storeLastAddr(addr, function(){
+        refreshOpenOrdersDex(addr)
+    });
+    
     
 });
     
@@ -1454,13 +1565,25 @@ $("#dexOpenOrdersAddress").change(function(){
                             
                             var volumeusd = (truevolume*assetprice).toFixed(2);
                             
+                            if(volumeusd < 0.01) {
+                            
+                                volumeusd = (truevolume*assetprice).toFixed(6);
+                                
+                            }
+                            
                             //console.log(volumeusd);
                             
                             var assetusd = (assetprice*price).toFixed(2);
                             
-                            marketprice = markets[i].price+" "+markets[i].quote_asset+" ($"+assetusd+")";
+                            if(assetusd < 0.01) {
                             
-                            volumeprice = truevolume+" "+markets[i].quote_asset+" ($"+volumeusd+")";
+                                assetusd = (assetprice*price).toFixed(6);
+                                
+                            }
+                            
+                            marketprice = "<span style='color: #fff;'>"+markets[i].price+" "+markets[i].quote_asset+"</span><br><span style='color: #679967;'>($"+assetusd+")</span>";
+                            
+                            volumeprice = "<span style='color: #fff;'>"+truevolume+" "+markets[i].quote_asset+"</span><br><span style='color: #679967;'>($"+volumeusd+")</span>";
                             
                         }
                     
@@ -1477,9 +1600,45 @@ $("#dexOpenOrdersAddress").change(function(){
                         volumeprice = truevolume;
                         
                     }
+                    
+                    var asset_image_url = "";
+                    
+//                    for(var k = 0; k < SOGAssetArray.length; k++) {
+//                        
+//                        if (markets[i].base_asset == SOGAssetArray[k]) {
+//                        
+//                            asset_image_url = "https://sogparty.com/pages/SOGImages/" + markets[i].base_asset + ".jpg";
+//                            var asset_image = "<img src='"+asset_image_url+"' width='110px'>";
+//                            break;
+//
+//                        }
+//                        
+//                    }
+                    
+                     for(var k = 0; k < SOGTileArray.length; k++) {
 
+                            if (markets[i].base_asset == SOGTileArray[k][2]) {
 
-                    $("#dexMarketAssets").append("<tr class='dexMarketSingle' data-base_asset='"+markets[i].base_asset+"' data-quote_asset='"+markets[i].quote_asset+"' data-quote_divisibility='"+markets[i].quote_divisibility+"'><td><div align='center' style='color: #000; background-color: #fff; padding: 5px; border-radius: 5px;'><img src='http://counterpartychain.io/content/images/icons/"+markets[i].base_asset.toLowerCase()+".png' width='46' height='46'><div style='padding-top: 4px;'>"+markets[i].base_asset+"</div></div></td><td style='background-color: #000;'><div><div><span style='text-decoration: underline; font-size: 10px;'>Last Price:</span><br><span style='color: #fff;'>"+marketprice+"</span></div><div style='padding-top: 5px;'><span style='text-decoration: underline; font-size: 10px;'>24hr Vol:</span><br><span style='color: #fff;'>"+volumeprice+"</span></div></div></td></tr>")
+                                asset_image_url = "https://sogassets.com"+SOGTileArray[k][0];
+                                var asset_image = "<img src='"+asset_image_url+"' width='90px'>";
+                                break;
+
+                            }
+
+                        }
+                    
+                    if (asset_image_url.length == 0) {
+                        
+                        asset_image_url = "http://counterpartychain.io/content/images/icons/"+markets[i].base_asset.toLowerCase()+".png";
+                        
+                        var asset_image = "<img src='"+asset_image_url+"'>";
+
+                        
+                    }
+                    
+                 
+
+                    $("#dexMarketAssets").append("<tr class='dexMarketSingle' data-base_asset='"+markets[i].base_asset+"' data-quote_asset='"+markets[i].quote_asset+"' data-quote_divisibility='"+markets[i].quote_divisibility+"'><td class='col-xs-5'><div align='center' style='color: #000; background-color: #fff; padding: 10px 0 10px 0; border-radius: 5px;'>"+asset_image+"<div style='padding-top: 4px;'>"+markets[i].base_asset+"</div></div></td><td class='col-xs-7' style='background-color: #000;'><div><div><span style='text-decoration: underline; font-size: 12px;'>Last Price:</span><br>"+marketprice+"</div><div style='padding-top: 5px;'><span style='text-decoration: underline; font-size: 12px;'>24hr Vol:</span><br>"+volumeprice+"</div></div></td></tr>")
 
                 }
                                            
@@ -1519,9 +1678,25 @@ $("#dexOpenOrdersAddress").change(function(){
 
             $("<tr class='orderbookbody'><td colspan='3'><div class='lead' style='text-align: center; width: 100%; color: #fff; margin: 17px 0 0 0; padding: 3px 3px 20px 3px; font-size: 16px;'>"+base_asset+" Order Book</div><div class='MarketSingleOrders' style='width: 100%; margin: auto; text-align: center;'><div style='padding: 20px 20px 50px 20px; color: #fff;'><i class='fa fa-cog fa-spin fa-5x'></i></div></div></td></tr>").insertAfter(row);
 
-
+        chrome.storage.local.get(function(data) {
+            
             getBuySell(base_asset, quote_asset, function(orders){
              //   console.log(orders);
+                
+                
+                
+                for(var j = 0; j < data.assetrates.length; j++) {
+  
+                        if(data.assetrates[j].assetname == quote_asset) {
+                    
+                            var assetpriceusd = parseFloat(data.assetrates[j].assetprice);
+                            
+                        }
+                    
+                };
+                
+                
+                
                 
  
                 var orderbook_body = "<tr><td colspan='3'>";
@@ -1557,14 +1732,19 @@ $("#dexOpenOrdersAddress").change(function(){
                           
                           var order_price = parseFloat(orders[i].price);
                           
+                          if (order_price < 0.01) {
+                              var order_price_usd = (order_price * assetpriceusd).toFixed(6);
+                          } else {
+                              var order_price_usd = (order_price * assetpriceusd).toFixed(2);
+                          }
 
                           if(orders[i].type == "SELL") {
 
-                              orderbook_body_sell += "<tr class='single-order-dex' style='text-align: left;' data-order_price='"+order_price+"' data-order_amount='"+order_amount+"' data-order_total='"+order_total+"' data-base_asset='"+base_asset+"' data-quote_asset='"+quote_asset+"' data-order_type='sell'><td>"+order_price+"</td><td>"+order_amount+"</td><td>"+order_total+"</td></tr>";
+                              orderbook_body_sell += "<tr class='single-order-dex' style='text-align: left;' data-order_price='"+order_price+"' data-order_amount='"+order_amount+"' data-order_total='"+order_total+"' data-base_asset='"+base_asset+"' data-quote_asset='"+quote_asset+"' data-order_type='sell'><td>"+order_price+" "+quote_asset+"<br><span style='color: #679967;'>($"+order_price_usd+")</span></td><td>"+order_amount+"</td><td>"+order_total+"</td></tr>";
 
                           } else if(orders[i].type == "BUY") {
                               
-                              orderbook_body_buy_array = orderbook_body_buy_array.concat({order_price: order_price, order_amount: order_amount, order_total: order_total}); 
+                              orderbook_body_buy_array = orderbook_body_buy_array.concat({order_price: order_price, order_price_usd: order_price_usd, order_amount: order_amount, order_total: order_total}); 
 
                           }
 
@@ -1576,12 +1756,11 @@ $("#dexOpenOrdersAddress").change(function(){
                     
                         $.each(reverse_buy_array, function(i, item) {
                             
-                            orderbook_body_buy += "<tr class='single-order-dex' style='text-align: left;' data-order_price='"+reverse_buy_array[i].order_price+"' data-order_amount='"+reverse_buy_array[i].order_amount+"' data-order_total='"+reverse_buy_array[i].order_total+"' data-base_asset='"+base_asset+"' data-quote_asset='"+quote_asset+"' data-order_type='buy'><td>"+reverse_buy_array[i].order_price+"</td><td>"+reverse_buy_array[i].order_amount+"</td><td>"+reverse_buy_array[i].order_total+"</td></tr>";
+                            orderbook_body_buy += "<tr class='single-order-dex' style='text-align: left;' data-order_price='"+reverse_buy_array[i].order_price+"' data-order_amount='"+reverse_buy_array[i].order_amount+"' data-order_total='"+reverse_buy_array[i].order_total+"' data-base_asset='"+base_asset+"' data-quote_asset='"+quote_asset+"' data-order_type='buy'><td>"+reverse_buy_array[i].order_price+" "+quote_asset+"<br><span style='color: #679967;'>($"+reverse_buy_array[i].order_price_usd+")</span></td><td>"+reverse_buy_array[i].order_amount+"</td><td>"+reverse_buy_array[i].order_total+"</td></tr>";
                             
                         });
                     
-                    
-                    
+             
                     orderbook_body_buy += "</tbody></table>";
                     orderbook_body_sell += "</tbody></table>";
 
@@ -1596,6 +1775,8 @@ $("#dexOpenOrdersAddress").change(function(){
                 
                 
             })
+            
+        })
       
         }
       

@@ -8,6 +8,74 @@
     
 }
 
+#content {
+
+     top: 70px;
+     position: relative;
+    
+}
+
+.tab-pane {
+    margin: auto;
+    width: 320px;
+}
+
+@media (max-width: 330px) {
+
+    #ejectbutton {
+
+        display: inline-block;
+    
+    }
+
+}
+
+@media (min-width: 331px) {
+
+    #ejectbutton {
+
+        display: none;
+    
+    }
+
+}
+
+@media (max-width: 767px) {
+
+    #content {
+
+        top: 70px;
+        position: relative;
+    
+    }
+
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+
+    #content {
+
+        top: 124px;
+        position: relative;
+    
+    }
+
+}
+
+@media (min-width: 992px) {
+
+    #content {
+
+        top: 70px;
+        position: relative;
+    
+    }
+
+}
+
+/*768 to 991*/
+
+
 body 
     {
         background:none transparent;
@@ -23,8 +91,6 @@ body
 .bg 
     {
         width: 320px;
-        min-height: 420px;
-        max-height: 700px;
         margin: 5px auto 5px auto; 
         background-color: #000;   
         color: #ccc;
@@ -644,14 +710,16 @@ a {
 	width: 100%;
     padding: 0 10px 5px 0;
     text-align: right;
-    bottom: 0;
+    bottom: 0px;
 	height: 25px;
 	color: #616161;
     font-weight: bold;
+    position: relative;
 
 }
 #refreshWallet {
 cursor: pointer;
+    display: inline-block;
 }
 
 /*
