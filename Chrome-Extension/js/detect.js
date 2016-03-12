@@ -7,6 +7,33 @@ function padprefix(str, max) {
 }
 
  
+function checkDivisibility(asset, callback) {
+    var xcp_source_html = "https://counterpartychain.io/api/asset/"+asset;
+    
+    var result;
+    
+    $.getJSON( xcp_source_html, function( data ) {  
+        
+        if (data.success == 1) {
+          
+            var divisibility = data.divisible;
+            
+            if(divisibility == 1) {
+                result = "true"; 
+            } else {
+                result = "false";
+            }
+            
+        } else {
+            
+            result = "error";
+            
+        }
+        
+        callback(result);
+        
+    })
+}
 
 
     
@@ -111,11 +138,38 @@ chrome.storage.local.get(function(data) {
 //                            0000000000000001  = Asset to Buy = 1 = XCP (hex to dec)
 //                            0000000035a4e900  = Amount to Buy = 900000000 (hex to dec)
 
-                        var asset_tosell = data_chunk.substring(26, 42);
-                        var amount_tosell = data_chunk.substring(42, 58);                            
+                            var asset_tosell_hex = data_chunk.substring(26, 42);
+                            var amount_tosell_hex = data_chunk.substring(42, 58);
+
+                            var asset_tobuy_hex = data_chunk.substring(58, 74);                            
+                            var amount_tobuy_hex = data_chunk.substring(74, 90);
+                            
+                            var asset_tosell = assetname(hexToDec(asset_tosell_hex));
+                            var asset_tobuy = assetname(hexToDec(asset_tobuy_hex));    
+                             
+                            checkDivisibility(asset_tosell, function(div){
+                                
+                                if(div == "true") {
+                                    var amount_tosell = parseFloat(hexToDec(amount_tosell_hex)) / 100000000;
+                                } else {
+                                    var amount_tosell = hexToDec(amount_tosell_hex);
+                                }
+                                
+                                checkDivisibility(asset_tobuy, function(div){
+                                
+                                    if(div == "true") {
+                                        var amount_tobuy = parseFloat(hexToDec(amount_tobuy_hex)) / 100000000;
+                                    } else {
+                                        var amount_tobuy = hexToDec(amount_tobuy_hex);
+                                    }
                             
                             
-                            $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Order Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset to Sell:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+asset_tosell+"</p></div><div class='col-xs-6'><p align='center'>Asset to Buy:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;' >"+amount_tosell+"</p></div></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+                                //checkDivisibility(asset, callback)
+                            
+                                    $( "<div align='center' style='padding: 10px; background-color: #000;  border: solid 10px #000; border-radius: 15px; box-shadow: 10px 10px 10px -2px rgba(0,0,0,0.25); color: #fff; margin: 20px auto 40px auto; width: 480px;'><div class='row'><div class='col-xs-12'><div class='lead' style='font-weight: bold;'>Asset Order Detected!</div><div style='margin-bottom: 15px;'>"+confirmation_text+"</div></div></div><div class='row' style='background-color: #fff; color: #000; padding-top: 10px; border: solid 3px #ED1650;'><div class='col-xs-6'><p align='center'>Asset to Sell:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+asset_tosell+"</p><p align='center'>Amount to Sell:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;'>"+amount_tosell+"</p></div><div class='col-xs-6'><p align='center'>Asset to Buy:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;' >"+asset_tobuy+"</p><p align='center'>Amount to Buy:</p><p style='font-size: 16px; line-height: 24px; font-weight: bold; color: #ED1650;' >"+amount_tobuy+"</p></div></div><div align='center' class='small' style='margin: 10px 0 -10px 0;'>Counterparty Data parsed by XCP Wallet</div></div>" ).insertAfter( ".row:first" );
+                                })
+                                
+                            })
                             
                         } else {
                          
