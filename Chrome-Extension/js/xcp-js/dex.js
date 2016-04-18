@@ -196,7 +196,7 @@ function create_order_data(sell_asset, sell_qty, buy_asset, buy_qty, expiration,
         if(sell_asset_div == "true"){
             sell_qty = sell_qty * 100000000;
         } else {
-            sell_qty = sell_qty.toFixed(0);
+            sell_qty = parseInt(sell_qty);
         }
         
         checkDivisibility(buy_asset, function(buy_asset_div){
