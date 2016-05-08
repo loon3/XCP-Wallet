@@ -219,7 +219,7 @@ function sendMessage(add_from, add_to, message, msig_total, btc_total, transfee,
 
         console.log(final_trans);
 
-        sendBTCpush(final_trans);  //uncomment to push raw tx to the bitcoin network
+        sendBTCpush_blockchaininfo(final_trans);  //uncomment to push raw tx to the bitcoin network
 
         callback();
 

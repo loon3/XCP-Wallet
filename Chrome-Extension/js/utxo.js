@@ -64,6 +64,50 @@ function sendBTCpush(hextx) {
     }
 }
 
+function ajax_blockchaininfo(url, data, rawtx) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+            console.log(xhr.responseText);
+     
+            $("#sendtokenbutton").html("Sent! Refresh to continue...");
+            //$("#sendtokenbutton").prop('disabled', true);
+
+            var newTxid = rawtotxid(rawtx);
+
+            console.log(newTxid);
+            $("#freezeUnconfirmed").css("display", "block");
+            $("#mainDisplay").css("display", "none");
+            $("#mainDisplay-working").hide();
+            //$("#yourtxid").html("<a href='https://blockchain.info/tx/"+newTxid+"'>View Transaction</a>");
+            $("#yourtxid").html("<a href='https://blockchain.info/tx/"+newTxid+"'>View Transaction</a>");
+            $("#txsendstatus").html("Balance will update after one confirmation");
+            $(".tipsendcomplete").html("<div class='h1' style='padding: 60px 0 30px 0;'>Send Complete!</div><div class='h4'>Token balances update in wallet after one confirmation</div><hr><div class='h2'><a href='https://blockchain.info/tx/"+newTxid+"'>View Transaction</a></div>");
+                         
+            xhr.close;
+        }
+    }
+    xhr.open(data ? "POST" : "GET", url, true);
+    if (data) xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhr.send(data);
+}
+
+function sendBTCpush_blockchaininfo(hextx) {
+    url = 'http://blockchain.info/pushtx';
+    postdata = 'tx=' + hextx;
+    
+    $("#mainDisplay").css("display", "none");
+    $("#mainDisplay-working").show();
+    
+//    url = 'https://chain.so/api/v2/send_tx/BTC';
+//    postdata = 'tx_hex=' + hextx;
+    
+    if (url != null && url != "")
+    {
+        ajax_blockchaininfo(url, postdata, hextx);
+    }
+}
+
 
 function ajaxCB(url, data, rawtx, callback) {
     var xhr = new XMLHttpRequest();

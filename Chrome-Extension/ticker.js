@@ -1178,7 +1178,7 @@ $("#encrypt-button").click(function(){
     
         var btcrate = $("#ltbPrice").data("btc").price;
         var usdrate = 1 / parseFloat(btcrate);
-        var usdValue = usdrate * 0.0003107;
+        var usdValue = usdrate * 0.0004107;
     
         $("#usdMessageCost").html(usdValue.toFixed(2));
         
@@ -1248,7 +1248,7 @@ $("#send-encrypt-message").click(function(){
     
     var btc_total = 0.00005468; 
     var msig_total = 0.000078;  //total btc to multisig output (returned to sender)
-    var transfee = 0.0001;  //bitcoin tx fee
+    var transfee = 0.0002;  //bitcoin tx fee
        
     var add_to = address_from_pubkeyhash(receiver);
 //    console.log(add_to);
