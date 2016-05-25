@@ -973,8 +973,6 @@ function loadAssets(add) {
                         var iconlink = "<img src='http://counterpartychain.io/content/images/icons/"+iconname+".png'>";
 
                         if (assetname.charAt(0) != "A") {
-                            
-                            //for
                         
                     
                                 for(var k = 0; k < SOGTileArray.length; k++) {
@@ -1005,60 +1003,60 @@ function loadAssets(add) {
 
                         } else {
                             
-//                            getSubassetsLocal(function(rn){
-//                                
-//                                var subasset_local = false;
-//                                
-//                                if(rn != undefined) {
-//                                
-//                                    for(var i = 0; i < rn.length; i++){
-//
-//                                        if(rn[i]["r"] == assetname) {
-//
-//                                            var subasset_local = rn[i]["n"];
-//
-//                                        } 
-//
-//                                    }
-//                                    
-//                                }
-//                                
-//                                if(subasset_local == false) {
-//                            
-//                                    findSubassetGrand(assetname, function(subasset) {
-//
-//                                        if(subasset != "error" && subasset != undefined) {
-//
-//                                            rn_array = rn_array.concat({r: assetname, n: subasset});
-//
-//                                            var subasset_lb = subasset.replace(/\./g, "<br>");
-//
-//                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'>"+iconlink+"</div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-//
-//                                        } else {
+                            getSubassetsLocal(function(rn){
+                                
+                                var subasset_local = false;
+                                
+                                if(rn != undefined) {
+                                
+                                    for(var i = 0; i < rn.length; i++){
+
+                                        if(rn[i]["r"] == assetname) {
+
+                                            var subasset_local = rn[i]["n"];
+
+                                        } 
+
+                                    }
+                                    
+                                }
+                                
+                                if(subasset_local == false) {
+                            
+                                    findSubassetGrand(assetname, function(subasset) {
+
+                                        if(subasset != "error" && subasset != undefined) {
+
+                                            rn_array = rn_array.concat({r: assetname, n: subasset});
+
+                                            var subasset_lb = subasset.replace(/\./g, "<br>");
+
+                                            var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'>"+iconlink+"</div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+
+                                        } else {
 
                                             var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'>"+iconlink+"</div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div class='assetname-numeric'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-//
-//                                        }
+
+                                        }
 
                                         $( "#allassets" ).append( assethtml );
 
-//                                    });
-//                                    
-//                                } else {
-//                                    
-//                                    var subasset_lb = subasset_local.replace(/\./g, "<br>");
-//
-//                                    var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'><img src='"+iconlink+"'></div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
-//                                    
-//                                    $( "#allassets" ).append( assethtml );
-//                                    
-//                                }
-//                                    
-//                                    
-//                                
-//  
-//                            });
+                                    });
+                                    
+                                } else {
+                                    
+                                    var subasset_lb = subasset_local.replace(/\./g, "<br>");
+
+                                    var assethtml = "<div class='singleasset-numeric row roundasset'><div class='col-xs-2' style='margin-left: -10px;'><div style='padding: 6px 0 0 2px;'>"+iconlink+"</div></div><div class='col-xs-10'><div class='archiveasset'>Archive</div><div id='"+assetname+"-subasset' class='assetname-subasset'>"+subasset_lb+"</div><div class='assetname-numeric' style='display: none;'>"+assetname+"</div><div class='movetowallet'>Send</div><div class='assetqtybox'><div class='assetqty' style='background-color: #3082B0; border-radius: 5px; padding: 3px 6px 3px 6px; min-width: 30px; margin-bottom: 3px; text-align: center;'>"+assetbalance+"</div> <div class='"+assetname+"-pending assetqty-unconfirmed'></div></div><div id='assetdivisible' style='display: none;'>"+divisible+"</div></div></div>";
+                                    
+                                    $( "#allassets" ).append( assethtml );
+                                    
+                                }
+                                    
+                                    
+                                
+  
+                            });
                             
                             
                         }
@@ -1157,21 +1155,21 @@ function loadAssets(add) {
                 }, 1500);  
         
         
-//                setTimeout(function(){  
-//                    
-//                    
-//                    if(rn_array.length > 0) {
-//                        
-//                        storeSubasset(rn_array, function(){
-//                            
-//                            var rn_array = new Array();
-//                            
-//                        });
-//                        
-//                    }
-//                    
-//                    
-//                }, 2000)
+                setTimeout(function(){  
+                    
+                    
+                    if(rn_array.length > 0) {
+                        
+                        storeSubasset(rn_array, function(){
+                            
+                            var rn_array = new Array();
+                            
+                        });
+                        
+                    }
+                    
+                    
+                }, 2000)
 
                 //loadTransactions(add);
             
