@@ -1,0 +1,6 @@
+{
+  "name": "Xcp-wallet",
+  "tagline": "Counterparty Chrome Wallet reboot",
+  "body": "# XCP Wallet\r\n\r\nChrome Extension Bitcoin/Counterparty Wallet\r\n\r\nCurrently under development.\r\n\r\n## To Install:\r\n\r\nDownload, unzip, and goto chrome://extensions/ in your Chrome browser. Make sure Developer Mode is selected and click on 'Load unpacked extension...' Select the Chrome Extension directory in the XCP-Wallet folder.\r\n\r\n## Release Notes\r\n\r\nv1.0.0 - Initial release\r\n\r\nv1.1.0 - Encrypted Messaging with ECIES\r\n\r\nv1.2.0 - DEX\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
